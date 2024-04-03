@@ -7,7 +7,7 @@
 
 #include "Player/SEPlayerController.h"
 #include "UI/SEGameHUD.h"
-#include "UI/SEInventoryContainerWidget.h"
+#include "UI/InventoryWidgets/SEInventoryContainerWidget.h"
 #include "InventorySystem/SEQuestItem.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogInteractableTarget, All, All);

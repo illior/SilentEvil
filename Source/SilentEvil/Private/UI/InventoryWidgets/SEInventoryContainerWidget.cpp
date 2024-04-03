@@ -1,16 +1,16 @@
 // Silent Evil Game, All Rights Reserved.
 
 
-#include "UI/SEInventoryContainerWidget.h"
+#include "UI/InventoryWidgets/SEInventoryContainerWidget.h"
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
 #include "Components/HorizontalBox.h"
 #include "Components/Overlay.h"
-#include "UI/SEMapWidget.h"
-#include "UI/SEInventoryWidget.h"
-#include "UI/SERecordsWidget.h"
+#include "UI/InventoryWidgets/MapWidgets/SEMapWidget.h"
+#include "UI/InventoryWidgets/ItemsWidgets/SEInventoryWidget.h"
+#include "UI/InventoryWidgets/RecordsWidgets/SERecordsWidget.h"
 
 #include "Player/SEPlayerController.h"
 #include "SEGameModeBase.h"

@@ -1,6 +1,6 @@
 // Silent Evil Game, All Rights Reserved.
 
-#include "UI/SEPauseMenuWidget.h"
+#include "UI/PauseMenuWidgets/SEPauseMenuWidget.h"
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"

@@ -1,7 +1,7 @@
 // Silent Evil Game, All Rights Reserved.
 
 
-#include "UI/SEDropDownButtonWidget.h"
+#include "UI/InventoryWidgets/ItemsWidgets/SEDropDownButtonWidget.h"
 
 #include "Styling/SlateBrush.h"
 #include "Components/Image.h"

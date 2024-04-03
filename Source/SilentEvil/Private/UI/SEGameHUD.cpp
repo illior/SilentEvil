@@ -5,7 +5,7 @@
 #include "Blueprint/UserWidget.h"
 #include "SEGameModeBase.h"
 
-#include "UI/SEInventoryContainerWidget.h"
+#include "UI/InventoryWidgets/SEInventoryContainerWidget.h"
 #include "UI/SEPlayerHUDWidget.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSEGameHUD, All, All);

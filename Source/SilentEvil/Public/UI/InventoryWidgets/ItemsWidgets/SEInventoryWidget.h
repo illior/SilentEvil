@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UI/SEBaseWidget.h"
+#include "UI/InventoryWidgets/SEBaseWidget.h"
 #include "SEInventoryWidget.generated.h"
 
 class UCanvasPanel;

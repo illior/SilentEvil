@@ -1,13 +1,13 @@
 // Silent Evil Game, All Rights Reserved.
 
-#include "UI/SERecordsWidget.h"
+#include "UI/InventoryWidgets/RecordsWidgets/SERecordsWidget.h"
 
 #include "Components/SEInventoryComponent.h"
 #include "Components/ScrollBox.h"
 #include "Components/ScrollBoxSlot.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
-#include "UI/SERecordTitleWidget.h"
+#include "UI/InventoryWidgets/RecordsWidgets/SERecordTitleWidget.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSERecords, All, All);
 

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "UI/SEDropDownButtonWidget.h"
+#include "UI/InventoryWidgets/ItemsWidgets/SEDropDownButtonWidget.h"
 #include "SEDropDownMenuWidget.generated.h"
 
 class USEItemData;

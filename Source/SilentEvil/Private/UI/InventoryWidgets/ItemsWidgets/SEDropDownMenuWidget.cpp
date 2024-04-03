@@ -1,6 +1,6 @@
 // Silent Evil Game, All Rights Reserved.
 
-#include "UI/SEDropDownMenuWidget.h"
+#include "UI/InventoryWidgets/ItemsWidgets/SEDropDownMenuWidget.h"
 
 #include "InventorySystem/SEItemData.h"
 #include "InventorySystem/SEBaseItem.h"

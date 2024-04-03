@@ -1,13 +1,13 @@
 // Silent Evil Game, All Rights Reserved.
 
-#include "UI/SEInventoryItemWidget.h"
+#include "UI/InventoryWidgets/ItemsWidgets/SEInventoryItemWidget.h"
 
 #include "Components/GridSlot.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 
-#include "UI/SEInventoryWidget.h"
+#include "UI/InventoryWidgets/ItemsWidgets/SEInventoryWidget.h"
 #include "InventorySystem/SEItemData.h"
 #include "InventorySystem/SEWeaponData.h"
 #include "InventorySystem/SEBaseItem.h"

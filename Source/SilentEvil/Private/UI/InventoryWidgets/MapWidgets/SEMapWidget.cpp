@@ -1,7 +1,7 @@
 // Silent Evil Game, All Rights Reserved.
 
 
-#include "UI/SEMapWidget.h"
+#include "UI/InventoryWidgets/MapWidgets/SEMapWidget.h"
 
 bool USEMapWidget::Cancel()
 {

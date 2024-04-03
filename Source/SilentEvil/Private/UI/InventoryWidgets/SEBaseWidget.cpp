@@ -1,7 +1,7 @@
 // Silent Evil Game, All Rights Reserved.
 
 
-#include "UI/SEBaseWidget.h"
+#include "UI/InventoryWidgets/SEBaseWidget.h"
 
 bool USEBaseWidget::Cancel()
 {

@@ -1,6 +1,6 @@
 // Silent Evil Game, All Rights Reserved.
 
-#include "UI/SEInventoryCursorWidget.h"
+#include "UI/InventoryWidgets/ItemsWidgets/SEInventoryCursorWidget.h"
 
 #include "Components/Image.h"
 #include "Components/CanvasPanelSlot.h"

@@ -60,7 +60,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Appearance")
 	FLinearColor ActiveColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Appearance")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Appearance")
 	FSlateBrush EmptyItem = FSlateBrush();
 
 	float InitialWidth = 100.0f;

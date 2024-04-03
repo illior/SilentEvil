@@ -1,6 +1,6 @@
 // Silent Evil Game, All Rights Reserved.
 
-#include "UI/SEInventorySlotWidget.h"
+#include "UI/InventoryWidgets/ItemsWidgets/SEInventorySlotWidget.h"
 
 #include "Components/Image.h"
 

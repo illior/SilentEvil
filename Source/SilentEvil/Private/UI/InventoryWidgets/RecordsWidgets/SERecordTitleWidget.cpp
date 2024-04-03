@@ -1,6 +1,6 @@
 // Silent Evil Game, All Rights Reserved.
 
-#include "UI/SERecordTitleWidget.h"
+#include "UI/InventoryWidgets/RecordsWidgets/SERecordTitleWidget.h"
 
 #include "Components/TextBlock.h"
 

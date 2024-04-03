@@ -1,6 +1,6 @@
 // Silent Evil Game, All Rights Reserved.
 
-#include "UI/SEInventoryWidget.h"
+#include "UI/InventoryWidgets/ItemsWidgets/SEInventoryWidget.h"
 
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
@@ -9,11 +9,11 @@
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/TextBlock.h"
-#include "UI/SEInventorySlotWidget.h"
-#include "UI/SEInventoryItemWidget.h"
-#include "UI/SEInventoryCursorWidget.h"
-#include "UI/SEDropDownMenuWidget.h"
-#include "UI/SEInspectWidget.h"
+#include "UI/InventoryWidgets/ItemsWidgets/SEInventorySlotWidget.h"
+#include "UI/InventoryWidgets/ItemsWidgets/SEInventoryItemWidget.h"
+#include "UI/InventoryWidgets/ItemsWidgets/SEInventoryCursorWidget.h"
+#include "UI/InventoryWidgets/ItemsWidgets/SEDropDownMenuWidget.h"
+#include "UI/InventoryWidgets/ItemsWidgets/SEInspectWidget.h"
 
 #include "Player/SEPlayerController.h"
 #include "Components/SEInventoryComponent.h"
