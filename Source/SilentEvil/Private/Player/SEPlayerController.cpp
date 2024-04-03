@@ -46,15 +46,11 @@ void ASEPlayerController::SetInteractTarget(ASEInteractableTarget* Target, bool 
 		return;
 	}
 
-	
-	//penTargetMenu(ShowItems);
-	
-	SetViewTarget(Target);
-	//SetViewTargetWithBlend(Target, BlendTime);
+	SetViewTargetWithBlend(Target, BlendTime);
 
 	FTimerDelegate TimerDelegate;
 	TimerDelegate.BindUFunction(this, FName("OpenTargetMenu"), ShowItems);
-	GetWorldTimerManager().SetTimer(InvokeTimerHandle, TimerDelegate, 0.1f, false);
+	GetWorldTimerManager().SetTimer(InvokeTimerHandle, TimerDelegate, BlendTime + 0.05f, false);
 }
 
 void ASEPlayerController::SetupInputComponent()
@@ -63,7 +59,9 @@ void ASEPlayerController::SetupInputComponent()
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent))
 	{
+		EnhancedInputComponent->BindAction(OpenMapAction, ETriggerEvent::Started, this, &ASEPlayerController::OpenMap);
 		EnhancedInputComponent->BindAction(OpenInventoryAction, ETriggerEvent::Started, this, &ASEPlayerController::OpenInventory);
+		EnhancedInputComponent->BindAction(OpenRecordsAction, ETriggerEvent::Started, this, &ASEPlayerController::OpenRecords);
 		EnhancedInputComponent->BindAction(OpenMenuAction, ETriggerEvent::Started, this, &ASEPlayerController::OpenMenu);
 	}
 }
@@ -112,9 +110,43 @@ void ASEPlayerController::OpenTargetMenu(bool ShowItems)
 
 	SetPause();
 
-	FVector NewPosition = Cast<ASEInteractableTarget>(GetViewTarget())->GetCameraLocation();
+	ASEInteractableTarget* ViewTarget = Cast<ASEInteractableTarget>(GetViewTarget());
+	FVector NewPosition = ViewTarget->GetCameraLocation();
 	NewPosition.Z = GetPawn()->GetActorLocation().Z;
 	GetPawn()->SetActorLocation(NewPosition);
+
+	SetControlRotation(ViewTarget->GetCameraRotation());
+}
+
+void ASEPlayerController::OpenMap()
+{
+	if (GetWorld() == nullptr || GetWorld()->GetAuthGameMode() == nullptr)
+	{
+		return;
+	}
+
+	ASEGameModeBase* GameMode = Cast<ASEGameModeBase>(GetWorld()->GetAuthGameMode());
+	if (GameMode == nullptr)
+	{
+		return;
+	}
+
+	if (!GameMode->SetInventoryPause(this))
+	{
+		return;
+	}
+
+	ASEGameHUD* SEHUD = Cast<ASEGameHUD>(MyHUD);
+	if (SEHUD == nullptr)
+	{
+		return;
+	}
+	SEHUD->OpenMap();
+
+	SetMappingContext(InventoryMenuMappingContext);
+	UE_LOG(LogSEPlayerController, Display, TEXT("Pause Inventory"));
+
+	SetPause();
 }
 
 void ASEPlayerController::OpenInventory()
@@ -141,6 +173,37 @@ void ASEPlayerController::OpenInventory()
 		return;
 	}
 	SEHUD->OpenInventory();
+
+	SetMappingContext(InventoryMenuMappingContext);
+	UE_LOG(LogSEPlayerController, Display, TEXT("Pause Inventory"));
+
+	SetPause();
+}
+
+void ASEPlayerController::OpenRecords()
+{
+	if (GetWorld() == nullptr || GetWorld()->GetAuthGameMode() == nullptr)
+	{
+		return;
+	}
+
+	ASEGameModeBase* GameMode = Cast<ASEGameModeBase>(GetWorld()->GetAuthGameMode());
+	if (GameMode == nullptr)
+	{
+		return;
+	}
+
+	if (!GameMode->SetInventoryPause(this))
+	{
+		return;
+	}
+
+	ASEGameHUD* SEHUD = Cast<ASEGameHUD>(MyHUD);
+	if (SEHUD == nullptr)
+	{
+		return;
+	}
+	SEHUD->OpenRecords();
 
 	SetMappingContext(InventoryMenuMappingContext);
 	UE_LOG(LogSEPlayerController, Display, TEXT("Pause Inventory"));

@@ -14,6 +14,7 @@ class USEMapWidget;
 class USEInventoryWidget;
 class USERecordsWidget;
 class UHorizontalBox;
+class UOverlay;
 
 class ASEInteractableTarget;
 
@@ -23,7 +24,11 @@ class SILENTEVIL_API USEInventoryContainerWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void Open(bool ForInteraction = false, bool ShowItems = true);
+	void OpenItems(bool ForInteraction = false, bool ShowItems = true);
+	void OpenRecords();
+	void OpenMap();
+
+	void HideItems();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
@@ -58,6 +63,9 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	UHorizontalBox* TopMenu;
+
+	UPROPERTY(meta = (BindWidget))
+	UOverlay* BackgroundBlur;
 
 protected:
 	bool CanChangeWidget = true;

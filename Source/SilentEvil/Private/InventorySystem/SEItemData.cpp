@@ -67,7 +67,7 @@ bool USEItemData::CanDrop() const
 
 bool USEItemData::IsWeapon() const
 {
-	return Item->IsA<USEBaseWeaponItem>();
+	return  Item == nullptr ? false : Item->IsA<USEBaseWeaponItem>();
 }
 
 bool USEItemData::IsFull() const

@@ -44,11 +44,12 @@ enum class EGameState : uint8
 };
 
 UENUM(BlueprintType)
-enum class EButtonState : uint8
+enum class ESEButtonState : uint8
 {
 	Normal UMETA(DisplayName = "Normal"),
-	Hover UMETA(DisplayName = "Hover"),
-	Disable UMETA(DisplayName = "Disable")
+	Hovered UMETA(DisplayName = "Hover"),
+	Pressed UMETA(DisplayName = "Pressed"),
+	Disabled UMETA(DisplayName = "Disable")
 };
 
 UENUM(BlueprintType)

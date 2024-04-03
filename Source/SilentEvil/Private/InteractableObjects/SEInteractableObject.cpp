@@ -2,6 +2,8 @@
 
 #include "InteractableObjects/SEInteractableObject.h"
 
+#include "Player/SECharacter.h"
+
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 
@@ -30,8 +32,11 @@ ASEInteractableObject::ASEInteractableObject()
 
 void ASEInteractableObject::Interact(APawn* Pawn)
 {
-	OnInteract.Broadcast(this, Pawn);
 	ReceiveInteract(Pawn);
+
+	OnInteract.Broadcast(this, Pawn);
+
+	StopCanInteract(Pawn);
 	if (DisableAfterInteract)
 	{
 		Disable();
@@ -42,12 +47,23 @@ void ASEInteractableObject::StartCanInteract(APawn* Pawn)
 {
 	WidgetComponent->SetVisibility(true);
 
+	if (Pawn->IsA<ASECharacter>())
+	{
+		ASECharacter* Character = Cast<ASECharacter>(Pawn);
+
+		DistanceToInteract = Character->GetDistanceForInteraction();
+	}
+
+	CurrentPawn = Pawn;
+
 	ReceiveStartCanInteract(Pawn);
 }
 
 void ASEInteractableObject::StopCanInteract(APawn* Pawn)
 {
 	WidgetComponent->SetVisibility(false);
+
+	CurrentPawn = nullptr;
 
 	ReceiveStopCanInteract(Pawn);
 }

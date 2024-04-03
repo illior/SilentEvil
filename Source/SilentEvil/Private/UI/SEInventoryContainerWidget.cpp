@@ -7,7 +7,10 @@
 #include "EnhancedInputSubsystems.h"
 
 #include "Components/HorizontalBox.h"
+#include "Components/Overlay.h"
+#include "UI/SEMapWidget.h"
 #include "UI/SEInventoryWidget.h"
+#include "UI/SERecordsWidget.h"
 
 #include "Player/SEPlayerController.h"
 #include "SEGameModeBase.h"
@@ -15,7 +18,7 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogSEInventoryContainer, All, All);
 
-void USEInventoryContainerWidget::Open(bool ForInteraction, bool ShowItems)
+void USEInventoryContainerWidget::OpenItems(bool ForInteraction, bool ShowItems)
 {
 	if (InventoryWidget == nullptr)
 	{
@@ -24,10 +27,12 @@ void USEInventoryContainerWidget::Open(bool ForInteraction, bool ShowItems)
 
 	SetVisibility(ESlateVisibility::Visible);
 	InventoryWidget->UpdateInventoryData(ForInteraction);
+	RecordsWidget->UpdataData();
 
 	CanChangeWidget = !ForInteraction;
 	if (ForInteraction)
 	{
+		BackgroundBlur->SetVisibility(ESlateVisibility::Hidden);
 		TopMenu->SetVisibility(ESlateVisibility::Hidden);
 
 		ASEPlayerController* CharacterController = Cast<ASEPlayerController>(GetOwningPlayer());
@@ -42,9 +47,54 @@ void USEInventoryContainerWidget::Open(bool ForInteraction, bool ShowItems)
 	}
 	else
 	{
+		BackgroundBlur->SetVisibility(ESlateVisibility::Visible);
 		TopMenu->SetVisibility(ESlateVisibility::Visible);
+
 		CurrentIndex = 1;
 		Widgets[CurrentIndex]->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void USEInventoryContainerWidget::OpenRecords()
+{
+	SetVisibility(ESlateVisibility::Visible);
+	InventoryWidget->UpdateInventoryData(false);
+	RecordsWidget->UpdataData();
+
+	CanChangeWidget = true;
+
+	BackgroundBlur->SetVisibility(ESlateVisibility::Visible);
+	TopMenu->SetVisibility(ESlateVisibility::Visible);
+
+	CurrentIndex = 2;
+	Widgets[CurrentIndex]->SetVisibility(ESlateVisibility::Visible);
+}
+
+void USEInventoryContainerWidget::OpenMap()
+{
+	SetVisibility(ESlateVisibility::Visible);
+	InventoryWidget->UpdateInventoryData(false);
+	RecordsWidget->UpdataData();
+
+	CanChangeWidget = true;
+
+	BackgroundBlur->SetVisibility(ESlateVisibility::Visible);
+	TopMenu->SetVisibility(ESlateVisibility::Visible);
+
+	CurrentIndex = 0;
+	Widgets[CurrentIndex]->SetVisibility(ESlateVisibility::Visible);
+}
+
+void USEInventoryContainerWidget::HideItems()
+{
+	if (ESlateVisibility::Collapsed == GetVisibility())
+	{
+		return;
+	}
+
+	if (!CanChangeWidget)
+	{
+		InventoryWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 

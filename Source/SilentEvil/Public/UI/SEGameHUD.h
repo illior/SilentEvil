@@ -7,6 +7,7 @@
 #include "SEGameHUD.generated.h"
 
 class USEInventoryContainerWidget;
+class USEPlayerHUDWidget;
 
 UCLASS()
 class SILENTEVIL_API ASEGameHUD : public AHUD
@@ -16,11 +17,20 @@ class SILENTEVIL_API ASEGameHUD : public AHUD
 
 public:
 	void OpenTargetInventory(bool ShowItems);
-
 	void OpenInventory();
+
+	void OpenRecords();
+
+	void OpenMap();
+
 	void OpenMenu();
 	
 	void Close();
+
+	UFUNCTION(BlueprintCallable, Category = "Interaction")
+	void ShowHelpText(FText InText, float Time = 5.0f);
+
+	USEInventoryContainerWidget* GetInventoryWidget();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
@@ -39,7 +49,7 @@ protected:
 	UUserWidget* PauseMenuWidget;
 
 	UPROPERTY()
-	UUserWidget* PlayerHUDWidget;
+	USEPlayerHUDWidget* PlayerHUDWidget;
 
 	virtual void BeginPlay() override;
 

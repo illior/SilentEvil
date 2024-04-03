@@ -35,7 +35,11 @@ protected:
 	UInputMappingContext* PauseMenuMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* OpenMapAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* OpenInventoryAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* OpenRecordsAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* OpenMenuAction;
 
@@ -53,7 +57,9 @@ private:
 	UFUNCTION()
 	void OpenTargetMenu(bool ShowItems);
 
+	void OpenMap();
 	void OpenInventory();
+	void OpenRecords();
 	void OpenMenu();
 
 	void SetGameMappingContext();

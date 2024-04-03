@@ -104,12 +104,24 @@ void ASECharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &ASECharacter::StopFire);
 
 		EnhancedInputComponent->BindAction(FastAccessAction, ETriggerEvent::Started, InventoryComponent, &USEInventoryComponent::FastAccessItem);
+
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ASECharacter::Interact);
 	}
 }
 
-bool ASECharacter::GetShouldSprint()
+bool ASECharacter::GetShouldSprint() const
 {
 	return ShouldSprint;
+}
+
+float ASECharacter::GetDistanceForInteraction() const
+{
+	return CloseDistanceInteraction;
+}
+
+UCameraComponent* ASECharacter::GetCameraComponent() const
+{
+	return CameraComponent;
 }
 
 void ASECharacter::BeginPlay()
@@ -152,7 +164,7 @@ void ASECharacter::SearchInteractableObject()
 	}
 
 	ASEInteractableObject* InteractObject = Cast<ASEInteractableObject>(HitResult.GetActor());
-	if (InteractObject == nullptr)
+	if (InteractObject == nullptr || !InteractObject->GetEnabled())
 	{
 		if (CurrentInteractableObject != nullptr)
 		{
@@ -312,23 +324,10 @@ void ASECharacter::Reload(const FInputActionValue& Value)
 
 void ASECharacter::StartFire(const FInputActionValue& Value)
 {
-	if (!IsAim && CurrentInteractableObject != nullptr)
-	{
-		if(CurrentDustanceToInteractionObject <= CloseDistanceInteraction)
-		{
-			CurrentInteractableObject->Interact(this);
-			CurrentInteractableObject->StopCanInteract(this);
-			CurrentInteractableObject = nullptr;
-		
-			return;
-		}
-	}
-
 	USEWeaponData* WeaponData = InventoryComponent->GetEquipWeapon();
 	if (IsAim && WeaponData != nullptr)
 	{
 		WeaponData->MakeShot();
-		return;
 	}
 }
 
@@ -345,4 +344,16 @@ void ASECharacter::StartAim(const FInputActionValue& Value)
 void ASECharacter::StopAim(const FInputActionValue& Value)
 {
 	IsAim = false;
+}
+
+void ASECharacter::Interact()
+{
+	if (CurrentInteractableObject != nullptr)
+	{
+		if (CurrentDustanceToInteractionObject <= CloseDistanceInteraction)
+		{
+			CurrentInteractableObject->Interact(this);
+			CurrentInteractableObject = nullptr;
+		}
+	}
 }

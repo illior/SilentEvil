@@ -2,6 +2,7 @@
 
 #include "Components/SEInventoryComponent.h"
 
+#include "InventorySystem/SEReadableRecord.h"
 #include "InventorySystem/SEItemData.h"
 #include "InventorySystem/SEWeaponData.h"
 #include "InventorySystem/SEBaseItem.h"
@@ -10,6 +11,7 @@
 #include "InventorySystem/Interfaces/SEUsableItemInterface.h"
 
 #include "InventorySystem/SECraftingList.h"
+#include "Engine/DataTable.h"
 
 #include "InputActionValue.h"
 
@@ -229,6 +231,49 @@ bool USEInventoryComponent::TryAddItem(USEBaseItem* Item, int32& Count)
 		Ammunation[AmmoItem->GetAmmoType()] -= Count;
 	}
 	return false;
+}
+
+void USEInventoryComponent::AddRecord(FName RowName)
+{
+	/*if (Records.Contains(RowName))
+	{
+		return;
+	}*/
+
+	if (RecordsTable == nullptr)
+	{
+		return;
+	}
+
+	FSEReadableRecord* Item = RecordsTable->FindRow<FSEReadableRecord>(RowName, "", false);
+	if (Item == nullptr)
+	{
+		return;
+	}
+
+	Records.Add(RowName);
+}
+
+TArray<FSEReadableRecord> USEInventoryComponent::GetRecords()
+{
+	if (RecordsTable == nullptr)
+	{
+		return TArray<FSEReadableRecord>();
+	}
+
+	TArray<FSEReadableRecord> Rows;
+
+	for (int i = 0; i < Records.Num(); i++)
+	{
+		FSEReadableRecord* Item = RecordsTable->FindRow<FSEReadableRecord>(Records[i], "", false);
+
+		if (Item != nullptr)
+		{
+			Rows.Add(*Item);
+		}
+	}
+
+	return Rows;
 }
 
 void USEInventoryComponent::ReloadEquipWeapon()

@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "SEPlayerHUDWidget.generated.h"
 
+class UTextBlock;
+
 class USEWeaponData;
 class USEInventoryComponent;
 
@@ -22,6 +24,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	int32 GetCurrentWeaponAmmo();
 
+	void SetHelpText(FText InText, float InTime);
+
+protected:
+	FTimerHandle HelpTextTimerHandle;
+	
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* HelpText;
+
 private:
+	UFUNCTION()
+	void HideText();
+
 	USEInventoryComponent* GetCharacterInventory();
 };

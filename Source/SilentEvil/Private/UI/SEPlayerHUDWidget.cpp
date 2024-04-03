@@ -2,6 +2,10 @@
 
 #include "UI/SEPlayerHUDWidget.h"
 
+#include "Engine/World.h"
+
+#include "Components/TextBlock.h"
+
 #include "InventorySystem/SEWeaponData.h"
 #include "Components/SEInventoryComponent.h"
 
@@ -31,6 +35,20 @@ int32 USEPlayerHUDWidget::GetCurrentWeaponAmmo()
 	}
 
 	return CharacterInventory->GetCountAmmoType(GetCurrentWeapon()->GetAmmoType());
+}
+
+void USEPlayerHUDWidget::SetHelpText(FText InText, float InTime)
+{
+	GetWorld()->GetTimerManager().ClearTimer(HelpTextTimerHandle);
+	GetWorld()->GetTimerManager().SetTimer(HelpTextTimerHandle, this, &USEPlayerHUDWidget::HideText, InTime, false);
+
+	HelpText->SetText(InText);
+	HelpText->SetVisibility(ESlateVisibility::Visible);
+}
+
+void USEPlayerHUDWidget::HideText()
+{
+	HelpText->SetVisibility(ESlateVisibility::Hidden);
 }
 
 USEInventoryComponent* USEPlayerHUDWidget::GetCharacterInventory()

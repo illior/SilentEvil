@@ -31,7 +31,10 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	bool GetShouldSprint();
+	bool GetShouldSprint() const;
+	float GetDistanceForInteraction() const;
+
+	UCameraComponent* GetCameraComponent() const;
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	USpringArmComponent* SpringArmComponent;
@@ -62,6 +65,10 @@ protected:
 	UInputAction* FireAction;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	UInputAction* FastAccessAction;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	UInputAction* CrouchAction;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	UInputAction* InteractAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
 	TSubclassOf<UCameraShakeBase> CameraWalkShake;
@@ -108,4 +115,6 @@ private:
 
 	void StartAim(const FInputActionValue& Value);
 	void StopAim(const FInputActionValue& Value);
+
+	void Interact();
 };

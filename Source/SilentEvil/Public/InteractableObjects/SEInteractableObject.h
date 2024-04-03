@@ -20,14 +20,20 @@ class SILENTEVIL_API ASEInteractableObject : public AActor
 public:
 	ASEInteractableObject();
 
+	UFUNCTION(BlueprintCallable, Category = "Interaction", meta = (DisplayName = "CallInteract"))
 	virtual void Interact(APawn* Pawn);
 
+	UFUNCTION(BlueprintCallable, Category = "Interaction", meta = (DisplayName = "CallStartCanInteract"))
 	virtual void StartCanInteract(APawn* Pawn);
+	UFUNCTION(BlueprintCallable, Category = "Interaction", meta = (DisplayName = "CallStopCanInteract"))
 	virtual void StopCanInteract(APawn* Pawn);
 
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
 	virtual void SetEnabled(bool NewValue);
+	UFUNCTION(BlueprintCallable, Category = "Interaction")
+	virtual bool GetEnabled() const { return IsEnabled; }
 
+	UFUNCTION(BlueprintCallable, Category = "Actor")
 	virtual FVector GetTargetLocation(AActor* RequestedBy = nullptr) const override;
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -44,6 +50,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	bool IsEnabled = true;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Interaction")
+	float DistanceToInteract = 200.0f;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Interaction")
+	APawn* CurrentPawn = nullptr;
 
 	virtual void Disable();
 	virtual void Enable();
@@ -66,7 +78,3 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Interaction", meta = (DisplayName = "Enable"))
 	void ReceiveEnable();
 };
-
-//UPROPERTY(BlueprintAssignable, Category = "Game")
-//FActorEndPlaySignature OnEndPlay;
-//DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FActorDestroyedSignature, AActor, OnDestroyed, AActor*, DestroyedActor );

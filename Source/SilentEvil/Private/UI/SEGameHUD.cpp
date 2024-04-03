@@ -6,6 +6,7 @@
 #include "SEGameModeBase.h"
 
 #include "UI/SEInventoryContainerWidget.h"
+#include "UI/SEPlayerHUDWidget.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSEGameHUD, All, All);
 
@@ -16,7 +17,7 @@ void ASEGameHUD::OpenTargetInventory(bool ShowItems)
 		return;
 	}
 
-	InventoryWidget->Open(true, ShowItems);
+	InventoryWidget->OpenItems(true, ShowItems);
 }
 
 void ASEGameHUD::OpenInventory()
@@ -26,7 +27,27 @@ void ASEGameHUD::OpenInventory()
 		return;
 	}
 
-	InventoryWidget->Open();
+	InventoryWidget->OpenItems();
+}
+
+void ASEGameHUD::OpenRecords()
+{
+	if (InventoryWidget == nullptr)
+	{
+		return;
+	}
+
+	InventoryWidget->OpenRecords();
+}
+
+void ASEGameHUD::OpenMap()
+{
+	if (InventoryWidget == nullptr)
+	{
+		return;
+	}
+
+	InventoryWidget->OpenMap();
 }
 
 void ASEGameHUD::OpenMenu()
@@ -56,6 +77,19 @@ void ASEGameHUD::Close()
 	}
 }
 
+void ASEGameHUD::ShowHelpText(FText InText, float Time)
+{
+	if (PlayerHUDWidget != nullptr)
+	{
+		PlayerHUDWidget->SetHelpText(InText, Time);
+	}
+}
+
+USEInventoryContainerWidget* ASEGameHUD::GetInventoryWidget()
+{
+	return InventoryWidget;
+}
+
 void ASEGameHUD::BeginPlay()
 {
 	Super::BeginPlay();
@@ -74,7 +108,7 @@ void ASEGameHUD::BeginPlay()
 		PauseMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
 
-	PlayerHUDWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDWidgetClass);
+	PlayerHUDWidget = CreateWidget<USEPlayerHUDWidget>(GetWorld(), PlayerHUDWidgetClass);
 	if (PlayerHUDWidget != nullptr)
 	{
 		PlayerHUDWidget->AddToViewport();

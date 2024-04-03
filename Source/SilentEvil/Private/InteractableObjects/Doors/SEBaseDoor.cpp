@@ -27,9 +27,29 @@ ASEBaseDoor::ASEBaseDoor()
 	CollisionComponent->SetCollisionProfileName(FName("NoCollision"));
 }
 
+void ASEBaseDoor::StartCanInteract(APawn* Pawn)
+{
+	if (!IsEnabled)
+	{
+		return;
+	}
+
+	Super::StartCanInteract(Pawn);
+}
+
+void ASEBaseDoor::StopCanInteract(APawn* Pawn)
+{
+	if (!IsEnabled)
+	{
+		return;
+	}
+
+	Super::StopCanInteract(Pawn);
+}
+
 void ASEBaseDoor::Interact(APawn* Pawn)
 {
-	if (Pawn == nullptr || IsMove)
+	if (Pawn == nullptr || IsMove || !IsEnabled)
 	{
 		return;
 	}
@@ -37,6 +57,7 @@ void ASEBaseDoor::Interact(APawn* Pawn)
 	if (!IsDoorLocked)
 	{
 		IsOpen ? Close() : Open(Pawn);
+		Disable();
 	}
 
 	Super::Interact(Pawn);
@@ -45,6 +66,21 @@ void ASEBaseDoor::Interact(APawn* Pawn)
 FVector ASEBaseDoor::GetTargetLocation(AActor* RequestedBy) const
 {
 	return WidgetComponent->GetComponentLocation();
+}
+
+void ASEBaseDoor::Disable()
+{
+	IsEnabled = false;
+	WidgetComponent->SetVisibility(false);
+
+	ReceiveDisable();
+}
+
+void ASEBaseDoor::Enable()
+{
+	IsEnabled = true;
+
+	ReceiveEnable();
 }
 
 void ASEBaseDoor::Open(APawn* Pawn)
@@ -93,6 +129,8 @@ void ASEBaseDoor::StopMoveDoor()
 {
 	IsMove = false;
 	IsOpen = !IsOpen;
+
+	Enable();
 }
 
 float ASEBaseDoor::GetAngle(FVector PawnLocation)

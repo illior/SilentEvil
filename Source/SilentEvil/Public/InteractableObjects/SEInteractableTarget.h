@@ -7,6 +7,7 @@
 #include "SEInteractableTarget.generated.h"
 
 class UCameraComponent;
+class USEQuestItem;
 class USEBaseItem;
 
 DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_TwoParams(FCompleteSignature, ASEInteractableTarget, OnComplete, ASEInteractableTarget*, ActivatedObject, APawn*, ActivatedBy);
@@ -20,10 +21,10 @@ class SILENTEVIL_API ASEInteractableTarget : public ASEInteractableObject
 public:
 	ASEInteractableTarget();
 
-	virtual void Interact(APawn* Pawn) override;
+	virtual void StartCanInteract(APawn* Pawn) override;
+	virtual void StopCanInteract(APawn* Pawn) override;
 
-	UFUNCTION(BlueprintCallable, Category = "Interaction")
-	virtual void Complete();
+	virtual void Interact(APawn* Pawn) override;
 
 	virtual void MoveVertical(const float& Value);
 	virtual void MoveHorizontal(const float& Value);
@@ -36,22 +37,23 @@ public:
 	bool GetRemoveItem() const;
 
 	FVector GetCameraLocation() const;
+	FRotator GetCameraRotation() const;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UCameraComponent* CameraComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-	bool WithInventory = false;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction", meta = (EditCondition = "WithInventory"))
-	TArray<USEBaseItem*> InteractableItems;
+	TArray<USEQuestItem*> InteractableItems;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction", meta = (EditCondition = "WithInventory"))
 	bool RemoveItem = true;
 
-	UPROPERTY(BlueprintReadWrite)
-	APawn* CurrentPawn = nullptr;
+	UFUNCTION(BlueprintCallable, Category = "Interaction")
+	virtual void HideItems();
+
+	UFUNCTION(BlueprintCallable, Category = "Interaction")
+	virtual void Complete();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Interaction", meta = (DisplayName = "MoveVertical"))
 	void ReceiveMoveVertical(const float& Value);
@@ -63,7 +65,7 @@ protected:
 	void ReceiveClose();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Interaction", meta = (DisplayName = "ItemUse"))
-	void ReceiveItemUse(USEBaseItem* InItem);
+	void ReceiveItemUse(USEQuestItem* InItem);
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")

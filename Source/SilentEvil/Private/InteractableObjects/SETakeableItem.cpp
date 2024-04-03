@@ -29,6 +29,7 @@ void ASETakeableItem::Interact(APawn* Pawn)
 
 	bool Result = CharacterInventory->TryAddItem(Item, ItemCount);
 
+	StopCanInteract(Pawn);
 	if (Result && DisableAfterInteract)
 	{
 		ReceiveInteract(Pawn);

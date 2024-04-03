@@ -18,6 +18,9 @@ class SILENTEVIL_API ASEBaseDoor : public ASEInteractableObject
 public:
 	ASEBaseDoor();
 
+	virtual void StartCanInteract(APawn* Pawn) override;
+	virtual void StopCanInteract(APawn* Pawn) override;
+
 	virtual void Interact(APawn* Pawn) override;
 
 	virtual FVector GetTargetLocation(AActor* RequestedBy = nullptr) const override;
@@ -49,7 +52,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
 	bool IsMove = false;
 
+	virtual void Disable() override;
+	virtual void Enable() override;
+
+	UFUNCTION(BlueprintCallable, Category = "Interaction")
 	virtual void Open(APawn* Pawn);
+	UFUNCTION(BlueprintCallable, Category = "Interaction")
 	virtual void Close();
 
 	virtual void BeginPlay() override;
@@ -60,5 +68,6 @@ private:
 	UFUNCTION()
 	void StopMoveDoor();
 
+	UFUNCTION(BlueprintCallable, Category = "Interaction")
 	float GetAngle(FVector PawnLocation);
 };

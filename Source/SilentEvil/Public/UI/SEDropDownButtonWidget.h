@@ -10,6 +10,14 @@
 class UImage;
 struct FSlateBrush;
 
+UENUM(BlueprintType)
+enum class EButtonState : uint8
+{
+	Normal UMETA(DisplayName = "Normal"),
+	Hover UMETA(DisplayName = "Hover"),
+	Disable UMETA(DisplayName = "Disable")
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDropDownButtonClickedSignature);
 
 UCLASS()
