@@ -33,7 +33,9 @@ public:
 	bool ContainsPoint(FIntPoint Point) const;
 
 	UFUNCTION(BlueprintCallable, Category = "ItemData")
-	FName GetItemName() const;
+	FText GetItemName() const;
+	UFUNCTION(BlueprintCallable, Category = "ItemData")
+	FText GetItemDescription() const;
 	UFUNCTION(BlueprintCallable, Category = "ItemData")
 	bool GetItemCanStack() const;
 	UFUNCTION(BlueprintCallable, Category = "ItemData")

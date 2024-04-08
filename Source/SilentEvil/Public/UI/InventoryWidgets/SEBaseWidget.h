@@ -20,6 +20,9 @@ public:
 	virtual void FastAccessItem(float Value);
 	virtual void Apply();
 
-protected:
+	FText GetWidgetName() const{ return WidgetName; }
 
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Content")
+	FText WidgetName;
 };

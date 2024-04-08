@@ -24,6 +24,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	int32 GetCurrentWeaponAmmo();
 
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	USEWeaponData* GetFastAccessWeapon(int32 Index);
+
 	void SetHelpText(FText InText, float InTime);
 
 protected:

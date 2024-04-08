@@ -385,9 +385,8 @@ int32 USEInventoryComponent::GetCountAmmoType(EAmmoType AmmoType)
 	return Ammunation[AmmoType];
 }
 
-void USEInventoryComponent::FastAccessItem(const FInputActionValue& Value)
+void USEInventoryComponent::FastAccessItem(const int32 Index)
 {
-	int32 Index = (int32)Value.Get<float>() - 1;
 	if (!FastAccessWeapons.IsValidIndex(Index))
 	{
 		return;

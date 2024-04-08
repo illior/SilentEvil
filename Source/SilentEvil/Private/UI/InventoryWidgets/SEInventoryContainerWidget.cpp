@@ -6,6 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
+#include "Components/TextBlock.h"
 #include "Components/HorizontalBox.h"
 #include "Components/Overlay.h"
 #include "UI/InventoryWidgets/MapWidgets/SEMapWidget.h"
@@ -52,6 +53,7 @@ void USEInventoryContainerWidget::OpenItems(bool ForInteraction, bool ShowItems)
 
 		CurrentIndex = 1;
 		Widgets[CurrentIndex]->SetVisibility(ESlateVisibility::Visible);
+		CurrentWidgetName->SetText(Widgets[CurrentIndex]->GetWidgetName());
 	}
 }
 
@@ -68,6 +70,7 @@ void USEInventoryContainerWidget::OpenRecords()
 
 	CurrentIndex = 2;
 	Widgets[CurrentIndex]->SetVisibility(ESlateVisibility::Visible);
+	CurrentWidgetName->SetText(Widgets[CurrentIndex]->GetWidgetName());
 }
 
 void USEInventoryContainerWidget::OpenMap()
@@ -83,6 +86,7 @@ void USEInventoryContainerWidget::OpenMap()
 
 	CurrentIndex = 0;
 	Widgets[CurrentIndex]->SetVisibility(ESlateVisibility::Visible);
+	CurrentWidgetName->SetText(Widgets[CurrentIndex]->GetWidgetName());
 }
 
 void USEInventoryContainerWidget::HideItems()
@@ -151,6 +155,8 @@ void USEInventoryContainerWidget::AdditiveHorizontal(const FInputActionValue& Va
 			Widgets[CurrentIndex]->SetVisibility(ESlateVisibility::Collapsed);
 			CurrentIndex += Offset;
 			Widgets[CurrentIndex]->SetVisibility(ESlateVisibility::Visible);
+
+			CurrentWidgetName->SetText(Widgets[CurrentIndex]->GetWidgetName());
 		}
 	}
 	else

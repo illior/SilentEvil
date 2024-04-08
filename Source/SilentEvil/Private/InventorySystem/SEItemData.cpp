@@ -30,9 +30,14 @@ bool USEItemData::ContainsPoint(FIntPoint Point) const
 	return Point == Position || (GetItemSize() == 2 && FIntPoint(Position.X + 1, Position.Y) == Point);
 }
 
-FName USEItemData::GetItemName() const
+FText USEItemData::GetItemName() const
 {
-	return Item == nullptr ? "" : Item->GetName();
+	return Item == nullptr ? FText() : Item->GetName();
+}
+
+FText USEItemData::GetItemDescription() const
+{
+	return Item == nullptr ? FText() : Item->GetDescription();
 }
 
 bool USEItemData::GetItemCanStack() const

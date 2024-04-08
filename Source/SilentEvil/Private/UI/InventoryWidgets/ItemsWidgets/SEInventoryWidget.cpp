@@ -316,7 +316,7 @@ void USEInventoryWidget::SetCurrentSelected()
 	{
 		USEInventoryItemWidget** PointCurrentItemWidget = InventoryItems.FindByPredicate([&](USEInventoryItemWidget* ItemWidget) {
 			return ItemWidget->GetItemData()->ContainsPoint(InventoryCursor->GetPosition());
-			});
+		});
 
 
 		CurrentItemWidget = PointCurrentItemWidget != nullptr ? *PointCurrentItemWidget : nullptr;
@@ -325,9 +325,10 @@ void USEInventoryWidget::SetCurrentSelected()
 		{
 			CurrentItemWidget->SetViewState(EViewState::Selected);
 
-			if (ItemName != nullptr)
+			if (ItemName != nullptr && ItemDescription != nullptr)
 			{
-				ItemName->SetText(FText::FromName(CurrentItemWidget->GetItemData()->GetItemName()));
+				ItemName->SetText(CurrentItemWidget->GetItemData()->GetItemName());
+				ItemDescription->SetText(CurrentItemWidget->GetItemData()->GetItemDescription());
 			}
 		}
 	}
@@ -336,9 +337,10 @@ void USEInventoryWidget::SetCurrentSelected()
 		CurrentItemWidget = nullptr;
 		InventorySlots[InventoryCursor->GetPosition()]->SetViewState(EViewState::Selected);
 
-		if (ItemName != nullptr)
+		if (ItemName != nullptr && ItemDescription != nullptr)
 		{
-			ItemName->SetText(FText::FromString(""));
+			ItemName->SetText(FText());
+			ItemDescription->SetText(FText());
 		}
 	}
 }

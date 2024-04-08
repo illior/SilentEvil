@@ -8,7 +8,8 @@ void USERecordTitleWidget::SetRecord(FSEReadableRecord NewRecord)
 {
 	Record = NewRecord;
 
-	ButtonText->SetText(FText::FromName(Record.Title));
+	Text = Record.Title;
+	//ButtonText->SetText(Record.Title);
 }
 
 FSEReadableRecord USERecordTitleWidget::GetRecord() const

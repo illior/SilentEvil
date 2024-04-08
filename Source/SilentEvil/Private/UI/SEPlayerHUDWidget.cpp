@@ -37,6 +37,17 @@ int32 USEPlayerHUDWidget::GetCurrentWeaponAmmo()
 	return CharacterInventory->GetCountAmmoType(GetCurrentWeapon()->GetAmmoType());
 }
 
+USEWeaponData* USEPlayerHUDWidget::GetFastAccessWeapon(int32 Index)
+{
+	USEInventoryComponent* CharacterInventory = GetCharacterInventory();
+	if (CharacterInventory == nullptr)
+	{
+		return nullptr;
+	}
+
+	return CharacterInventory->GetFastAccessWeapon(Index);
+}
+
 void USEPlayerHUDWidget::SetHelpText(FText InText, float InTime)
 {
 	GetWorld()->GetTimerManager().ClearTimer(HelpTextTimerHandle);

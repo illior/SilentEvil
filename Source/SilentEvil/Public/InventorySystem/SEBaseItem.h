@@ -15,7 +15,8 @@ class SILENTEVIL_API USEBaseItem : public UDataAsset
 
 
 public:
-	FName GetName() const { return Name; }
+	FText GetName() const { return Name; }
+	FText GetDescription() const { return Description; }
 	bool GetCanStack() const { return CanStack; }
 	int32 GetMaxStackAmount() const { return MaxStackAmount; }
 	int32 GetSize() const { return Size; }
@@ -24,7 +25,10 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
-	FName Name = "unique_name";
+	FText Name = FText::FromString("Item Name");
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
+	FText Description = FText::FromString("Item Description");
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	bool CanStack = false;

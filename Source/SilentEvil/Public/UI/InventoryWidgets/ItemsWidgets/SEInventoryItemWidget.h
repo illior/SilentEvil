@@ -23,7 +23,9 @@ public:
 	UPROPERTY()
 	USEInventoryWidget* ParentWidget = nullptr;
 
+	UFUNCTION(BlueprintCallable, Category = "UI")
 	void SetItemData(USEItemData* NewItemData);
+	UFUNCTION(BlueprintCallable, Category = "UI")
 	USEItemData* GetItemData();
 
 	void SetViewState(EViewState NewState);
@@ -63,6 +65,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Appearance")
 	FSlateBrush EmptyItem = FSlateBrush();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Appearance")
 	float InitialWidth = 100.0f;
 
 private:

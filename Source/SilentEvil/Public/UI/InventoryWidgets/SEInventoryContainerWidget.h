@@ -15,6 +15,7 @@ class USEInventoryWidget;
 class USERecordsWidget;
 class UHorizontalBox;
 class UOverlay;
+class UTextBlock;
 
 class ASEInteractableTarget;
 
@@ -22,6 +23,7 @@ UCLASS()
 class SILENTEVIL_API USEInventoryContainerWidget : public UUserWidget
 {
 	GENERATED_BODY()
+
 
 public:
 	void OpenItems(bool ForInteraction = false, bool ShowItems = true);
@@ -51,6 +53,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* FastAccessAction;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* CurrentWidgetName;
 
 	UPROPERTY(meta = (BindWidget))
 	USEMapWidget* MapWidget;

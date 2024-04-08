@@ -17,7 +17,7 @@ struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemCraftedSignature, USEItemData*, CreatedItem);
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SILENTEVIL_API USEInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -61,14 +61,16 @@ public:
 	void ReloadEquipWeapon();
 
 	void SetEquipWeapon(USEItemData* ItemData);
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	USEWeaponData* GetEquipWeapon() const;
 
 	void SetFastAccessWeapon(USEItemData* ItemData, int32 Index);
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	USEWeaponData* GetFastAccessWeapon(int32 Index) const;
 
 	int32 GetCountAmmoType(EAmmoType AmmoType);
 
-	void FastAccessItem(const FInputActionValue& Value);
+	void FastAccessItem(const int32 index);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Instanced, BlueprintReadWrite, Category = "Inventory")
@@ -83,8 +85,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "InventoryCrafting")
 	USECraftingList* CraftingList = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Inventory", meta = (RequiredAssetDataTags = "RowStructure=FSEReadableRecord"))
-	UDataTable* RecordsTable = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Inventory") // , meta = (RequiredAssetDataTags = "RowStructure=FSEReadableRecord")
+	UDataTable* RecordsTable;
 
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;

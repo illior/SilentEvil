@@ -10,7 +10,7 @@ struct FSEReadableRecord : public FTableRowBase
 
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Record")
-	FName Title;
+	FText Title;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Record")
 	TArray<FText> Pages;

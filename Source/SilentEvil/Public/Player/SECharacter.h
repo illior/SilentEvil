@@ -35,6 +35,9 @@ public:
 	float GetDistanceForInteraction() const;
 
 	UCameraComponent* GetCameraComponent() const;
+
+	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	USpringArmComponent* SpringArmComponent;
@@ -84,6 +87,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Interaction")
 	float CapsuleRadiusForSearchInteraction = 20.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
+	float StandCameraHeight = 60.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
+	float CrouchCameraHeight = 40.0f;
+
 	virtual void BeginPlay() override;
 
 private:
@@ -98,23 +106,29 @@ private:
 
 	void SearchInteractableObject();
 
-	void StartMove(const FInputActionValue& Value);
-	void StopMove(const FInputActionValue& Value);
+	void InputStartMove(const FInputActionValue& Value);
+	void InputStopMove(const FInputActionValue& Value);
 
-	void Move(const FInputActionValue& Value);
-	void Look(const FInputActionValue& Value);
+	void InputMove(const FInputActionValue& Value);
+	void InputLook(const FInputActionValue& Value);
 
-	void Sprint(const FInputActionValue& Value);
+	void InputCrouch(const FInputActionValue& Value);
+	void StartCrouch();
+	void StopCrouch();
+
+	void InputSprint(const FInputActionValue& Value);
 	void StartSprint();
 	void StopSprint();
 
-	void Reload(const FInputActionValue& Value);
+	void InputReload(const FInputActionValue& Value);
 
-	void StartFire(const FInputActionValue& Value);
-	void StopFire(const FInputActionValue& Value);
+	void InputStartFire(const FInputActionValue& Value);
+	void InputStopFire(const FInputActionValue& Value);
 
-	void StartAim(const FInputActionValue& Value);
-	void StopAim(const FInputActionValue& Value);
+	void InputStartAim(const FInputActionValue& Value);
+	void InputStopAim(const FInputActionValue& Value);
 
-	void Interact();
+	void InputFastAccessItem(const FInputActionValue& Value);
+
+	void InputInteract(const FInputActionValue& Value);
 };

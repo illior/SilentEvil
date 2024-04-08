@@ -56,6 +56,9 @@ protected:
 	UTextBlock* ItemName;
 
 	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ItemDescription;
+
+	UPROPERTY(meta = (BindWidget))
 	UTextBlock* CurrentHealth;
 
 	UPROPERTY(meta = (BindWidget))
