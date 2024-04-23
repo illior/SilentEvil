@@ -6,12 +6,14 @@
 #include "Player/SECharacter.h"
 #include "Player/SEPlayerController.h"
 #include "UI/SEGameHUD.h"
+#include "Player/SEPlayerState.h"
 
 ASEGameModeBase::ASEGameModeBase()
 {
 	DefaultPawnClass = ASECharacter::StaticClass();
 	PlayerControllerClass = ASEPlayerController::StaticClass();
 	HUDClass = ASEGameHUD::StaticClass();
+	PlayerStateClass = ASEPlayerState::StaticClass();
 }
 
 EGameState ASEGameModeBase::GetGameState()

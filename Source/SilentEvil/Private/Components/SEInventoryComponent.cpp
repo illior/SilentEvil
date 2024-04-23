@@ -139,7 +139,7 @@ void USEInventoryComponent::UseItem(USEItemData* ItemData)
 	}
 }
 
-bool USEInventoryComponent::DropItem(USEItemData* ItemData)
+bool USEInventoryComponent::DropItem(USEItemData* ItemData, bool IsGarbage)
 {
 	if (Items.Contains(ItemData))
 	{
@@ -152,7 +152,15 @@ bool USEInventoryComponent::DropItem(USEItemData* ItemData)
 			}
 		}
 
-		DestroyItem(ItemData);
+		if (ItemData->IsWeapon())
+		{
+			USEWeaponData* WeaponData = Cast<USEWeaponData>(ItemData);
+
+			CurrentWeapon = CurrentWeapon == WeaponData ? nullptr : CurrentWeapon;
+			FastAccessWeapons.Remove(WeaponData);
+		}
+
+		DestroyItem(ItemData, IsGarbage);
 	
 		return true;
 	}
@@ -218,7 +226,6 @@ bool USEInventoryComponent::TryAddItem(USEBaseItem* Item, int32& Count)
 			}
 
 			USEItemData* NewItem = CreateItemData(Item, j, i, Count);
-			TryAddAmmo(NewItem);
 
 			UE_LOG(LogCharacterInventory, Display, TEXT("Add item: %s"), *NewItem->Position.ToString());
 			return true;
@@ -229,6 +236,80 @@ bool USEInventoryComponent::TryAddItem(USEBaseItem* Item, int32& Count)
 	{
 		USEAmmoItem* AmmoItem = Cast<USEAmmoItem>(Item);
 		Ammunation[AmmoItem->GetAmmoType()] -= Count;
+	}
+	return false;
+}
+
+bool USEInventoryComponent::TryAddItem(USEItemData* ItemData)
+{
+	if (ItemData == nullptr)
+	{
+		return false;
+	}
+
+	if (ItemData->GetItem()->IsA<USEAmmoItem>())
+	{
+		USEAmmoItem* AmmoItem = Cast<USEAmmoItem>(ItemData->GetItem());
+		if (!Ammunation.Contains(AmmoItem->GetAmmoType()))
+		{
+			Ammunation.Add(AmmoItem->GetAmmoType(), ItemData->GetCount());
+		}
+		else
+		{
+			Ammunation[AmmoItem->GetAmmoType()] += ItemData->GetCount();
+		}
+	}
+
+	if (ItemData->GetItemCanStack())
+	{
+		for (USEItemData* ItemDataInv : Items)
+		{
+			if (ItemDataInv->GetItem() != ItemData->GetItem() || ItemData->IsFull())
+			{
+				continue;
+			}
+
+			if (ItemDataInv->GetCount() + ItemData->GetCount() <= ItemData->GetItemMaxStackAmount())
+			{
+				ItemData->SetCount(ItemDataInv->GetCount() + ItemData->GetCount());
+
+				ItemData->MarkAsGarbage();
+				return true;
+			}
+			else
+			{
+				ItemData->SetCount(ItemDataInv->GetCount() + ItemData->GetCount() - ItemData->GetItemMaxStackAmount());
+				ItemDataInv->SetCount(ItemData->GetItemMaxStackAmount());
+			}
+		}
+	}
+
+	for (int32 i = 0; i < MaxSize.Y; i++)
+	{
+		for (int32 j = 0; j < MaxSize.X; j++)
+		{
+			if (ItemsMatrix[i][j] != ESlotState::Void)
+			{
+				continue;
+			}
+
+			if (ItemData->GetItemSize() == 2 && GetSlotState(j + 1, i) != ESlotState::Void)
+			{
+				continue;
+			}
+
+			ItemData->SetPosition(j, i);
+			AddItemData(ItemData);
+
+			UE_LOG(LogCharacterInventory, Display, TEXT("Add item: %s"), *ItemData->Position.ToString());
+			return true;
+		}
+	}
+
+	if (ItemData->IsA<USEAmmoItem>())
+	{
+		USEAmmoItem* AmmoItem = Cast<USEAmmoItem>(ItemData);
+		Ammunation[AmmoItem->GetAmmoType()] -= ItemData->GetCount();
 	}
 	return false;
 }
@@ -469,14 +550,23 @@ USEItemData* USEInventoryComponent::CreateItemData(USEBaseItem* Item, const int3
 		NewItemData = ItemData;
 	}
 
-
 	SetItemPosition(NewItemData, X, Y);
 	Items.Add(NewItemData);
+
+	OnItemAdd.Broadcast(NewItemData);
 
 	return NewItemData;
 }
 
-void USEInventoryComponent::DestroyItem(USEItemData* ItemData)
+void USEInventoryComponent::AddItemData(USEItemData* ItemData)
+{
+	SetItemPosition(ItemData, ItemData->GetPosition().X, ItemData->GetPosition().Y);
+	Items.Add(ItemData);
+
+	OnItemAdd.Broadcast(ItemData);
+}
+
+void USEInventoryComponent::DestroyItem(USEItemData* ItemData, bool IsGarbage)
 {
 	if (ItemData == nullptr)
 	{
@@ -493,7 +583,10 @@ void USEInventoryComponent::DestroyItem(USEItemData* ItemData)
 	ItemData->Drop();
 	Items.Remove(ItemData);
 
-	ItemData->MarkAsGarbage();
+	if (IsGarbage)
+	{
+		ItemData->MarkAsGarbage();
+	}
 }
 
 bool USEInventoryComponent::MoveShortItem(USEItemData* ItemData, const int32& X, const int32& Y)
@@ -661,7 +754,7 @@ bool USEInventoryComponent::TryCraft(USEItemData* ItemData1, USEItemData* ItemDa
 		USEItemData* NewItemData = CreateItemData(Result, NewItemPosition.X, NewItemPosition.Y, ItemCount);
 		TryAddAmmo(NewItemData);
 
-		OnItemCrafted.Broadcast(NewItemData);
+		OnItemAdd.Broadcast(NewItemData);
 
 		return true;
 	}

@@ -14,6 +14,7 @@
 #include "UI/InventoryWidgets/ItemsWidgets/SEInventoryCursorWidget.h"
 #include "UI/InventoryWidgets/ItemsWidgets/SEDropDownMenuWidget.h"
 #include "UI/InventoryWidgets/ItemsWidgets/SEInspectWidget.h"
+#include "UI/InventoryWidgets/ItemsWidgets/SEItemsStorageWidget.h"
 
 #include "Player/SEPlayerController.h"
 #include "Components/SEInventoryComponent.h"
@@ -23,40 +24,37 @@
 #include "InventorySystem/Interfaces/SEUsableItemInterface.h"
 #include "InventorySystem/Actors/SEItemVisual.h"
 #include "InteractableObjects/SEInteractableTarget.h"
+#include "InteractableObjects/SEStorageBox.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogUInventory, All, All);
 
 bool USEInventoryWidget::Cancel()
 {
-	if (ListenForBind)
+	switch (InventoryState)
 	{
-		StopFastAccess();
-
-		return false;
-	}
-
-	if (DropDownMenuIsOpen)
-	{
+	case ESEInventoryState::Selected:
+		return true;
+	case ESEInventoryState::DropDownMenu:
 		CloseDropDownMenu();
-
 		return false;
-	}
-
-	if (ItemIsMoving)
-	{
+	case ESEInventoryState::ItemMoving:
 		CancelMoveItem();
-
 		return false;
-	}
-
-	if (ItemInspect)
-	{
+	case ESEInventoryState::ListenBind:
+		StopFastAccess();
+		return false;
+	case ESEInventoryState::ItemInspect:
 		if (CurrentItemWidget->GetItemData()->GetItemVisual()->Cancel())
 		{
 			StopInspectItem();
 		}
-
 		return false;
+	case ESEInventoryState::Storage:
+		MoveCuresorFromStorage();
+		return false;
+		break;
+	default:
+		break;
 	}
 
 	return true;
@@ -64,88 +62,84 @@ bool USEInventoryWidget::Cancel()
 
 void USEInventoryWidget::MoveItem()
 {
-	if (ListenForBind)
+	switch (InventoryState)
 	{
-		StopFastAccess();
-		return;
-	}
-
-	if (ItemIsMoving)
-	{
-		StopMoveItem();
-		return;
-	}
-
-	if (ItemInspect)
-	{
-		// item inspect
-		return;
-	}
-
-	if (!DropDownMenuIsOpen)
-	{
+	case ESEInventoryState::Selected:
 		StartMoveItem();
+		break;
+	case ESEInventoryState::DropDownMenu:
+		break;
+	case ESEInventoryState::ItemMoving:
+		StopMoveItem();
+		break;
+	case ESEInventoryState::ListenBind:
+		StopFastAccess();
+		break;
+	case ESEInventoryState::ItemInspect:
+		break;
+	case ESEInventoryState::Storage:
+		break;
+	default:
+		break;
 	}
 }
 
 void USEInventoryWidget::MoveVertical(float Value)
 {
-	if (ListenForBind)
+	switch (InventoryState)
 	{
-		StopFastAccess();
-		return;
-	}
-
-	if (DropDownMenu == nullptr)
-	{
-		return;
-	}
-
-	if (DropDownMenuIsOpen)
-	{
+	case ESEInventoryState::Selected:
+		MoveItemTo(FIntPoint(0, (int32)Value));
+		break;
+	case ESEInventoryState::DropDownMenu:
 		Value > 0 ? DropDownMenu->MoveSelectedUp() : DropDownMenu->MoveSelectedDown();
-
-		return;
-	}
-
-	if (ItemInspect)
-	{
+		break;
+	case ESEInventoryState::ItemMoving:
+		MoveItemTo(FIntPoint(0, (int32)Value));
+		break;
+	case ESEInventoryState::ListenBind:
+		StopFastAccess();
+		break;
+	case ESEInventoryState::ItemInspect:
 		CurrentItemWidget->GetItemData()->GetItemVisual()->VerticalInput(Value);
-
-		return;
+		break;
+	case ESEInventoryState::Storage:
+		StorageMoveCursor((int32)-Value);
+		break;
+	default:
+		break;
 	}
-
-	MoveItemTo(FIntPoint(0, (int32)Value));
 }
 
 void USEInventoryWidget::MoveHorizontal(float Value)
 {
-	if (ListenForBind)
+	switch (InventoryState)
 	{
-		StopFastAccess();
-		return;
-	}
-
-	if (DropDownMenuIsOpen)
-	{
+	case ESEInventoryState::Selected:
+		MoveItemTo(FIntPoint((int32)Value, 0));
+		break;
+	case ESEInventoryState::DropDownMenu:
 		CloseDropDownMenu();
-
-		return;
-	}
-
-	if (ItemInspect)
-	{
+		break;
+	case ESEInventoryState::ItemMoving:
+		MoveItemTo(FIntPoint((int32)Value, 0));
+		break;
+	case ESEInventoryState::ListenBind:
+		StopFastAccess();
+		break;
+	case ESEInventoryState::ItemInspect:
 		CurrentItemWidget->GetItemData()->GetItemVisual()->HorizontalInput(Value);
-
-		return;
+		break;
+	case ESEInventoryState::Storage:
+		break;
+	default:
+		break;
 	}
-
-	MoveItemTo(FIntPoint((int32)Value, 0));
 }
 
 void USEInventoryWidget::FastAccessItem(float Value)
 {
-	if (ListenForBind)
+	if (InventoryState == ESEInventoryState::ListenBind)
 	{
 		SetFastAccess((int32)Value - 1);
 	}
@@ -153,59 +147,68 @@ void USEInventoryWidget::FastAccessItem(float Value)
 
 void USEInventoryWidget::Apply()
 {
-	if (ListenForBind)
+	switch (InventoryState)
 	{
-		StopFastAccess();
-		return;
-	}
-
-	if (DropDownMenu == nullptr)
-	{
-		return;
-	}
-
-	if (ItemIsMoving)
-	{
-		StopMoveItem();
-
-		return;
-	}
-
-	if (DropDownMenuIsOpen)
-	{
+	case ESEInventoryState::Selected:
+		OpenDropDownMenu();
+		break;
+	case ESEInventoryState::DropDownMenu:
 		DropDownMenu->ActivateSelected();
-
-		return;
-	}
-
-	if (ItemInspect)
-	{
+		break;
+	case ESEInventoryState::ItemMoving:
+		StopMoveItem();
+		break;
+	case ESEInventoryState::ListenBind:
+		StopFastAccess();
+		break;
+	case ESEInventoryState::ItemInspect:
 		CurrentItemWidget->GetItemData()->GetItemVisual()->Apply();
+		break;
+	case ESEInventoryState::Storage:
+		ItemsStorage->Apply();
 
-		return;
+		if (ItemsStorage->IsEmpty())
+		{
+			MoveCuresorFromStorage();
+		}
+
+		break;
+	default:
+		break;
 	}
-
-	OpenDropDownMenu();
 }
 
 void USEInventoryWidget::UpdateInventoryData(bool OpenForInteraction)
 {
-	ForInteraction = OpenForInteraction;
 	CurrentItemWidget = nullptr;
 
 	InspectPanel->SetVisibility(ESlateVisibility::Collapsed);
-	ItemInspect = false;
+	ItemsStorage->Hide();
 
-	UpdateSlots();
-	UpdateItems();
-
-	if (ForInteraction)
+	if (InventoryItems.Num() == 0)
 	{
+		UpdateSlots();
+		UpdateItems();
+	}
+
+	if (OpenForInteraction)
+	{
+		CurrentState = ESEInventoryOpenState::Interaction;
+
+		ASEPlayerController* CharacterController = Cast<ASEPlayerController>(GetOwningPlayer());
+		if (CharacterController != nullptr && CharacterController->GetViewTarget() != nullptr && CharacterController->GetViewTarget()->IsA<ASEStorageBox>())
+		{
+			CurrentState = ESEInventoryOpenState::Storage;
+			ItemsStorage->Show();
+		}
+
 		HideFastAccessItems();
 		HideHealth();
 	}
 	else
 	{
+		CurrentState = ESEInventoryOpenState::Base;
+
 		UpdateFastAccessItems();
 		UpdateHealth();
 	}
@@ -216,8 +219,7 @@ void USEInventoryWidget::UpdateInventoryData(bool OpenForInteraction)
 
 	CloseDropDownMenu();
 
-	ItemIsMoving = false;
-	DropDownMenuIsOpen = false;
+	InventoryState = ESEInventoryState::Selected;
 }
 
 void USEInventoryWidget::RemoveItem(USEInventoryItemWidget* ItemWidget)
@@ -242,6 +244,26 @@ void USEInventoryWidget::RemoveItem(USEInventoryItemWidget* ItemWidget)
 		}
 
 		InventoryItems.Remove(ItemWidget);
+
+		ItemWidget->RemoveFromParent();
+		ItemWidget->MarkAsGarbage();
+	}
+}
+
+void USEInventoryWidget::UpdatePosition(USEInventoryItemWidget* ItemWidget)
+{
+	if (InventoryItems.Contains(ItemWidget))
+	{
+		USEItemData* ItemData = ItemWidget->GetItemData();
+		FIntPoint Position = ItemData->GetPosition();
+
+		InventorySlots[Position]->SetState(ESlotState::Item);
+
+		if (ItemData->GetItemSize() == 2)
+		{
+			Position.X += 1;
+			InventorySlots[Position]->SetState(ESlotState::Item);
+		}
 	}
 }
 
@@ -259,13 +281,14 @@ void USEInventoryWidget::NativeOnInitialized()
 	DropDownMenu->GetUseButtonSignature().AddDynamic(this, &USEInventoryWidget::UseItem);
 	DropDownMenu->GetEquipButtonSignature().AddDynamic(this, &USEInventoryWidget::EquipWeaponItem);
 	DropDownMenu->GetFastAccessButtonSignature().AddDynamic(this, &USEInventoryWidget::FastAccessWeaponItem);
+	DropDownMenu->GetStoreButtonSignature().AddDynamic(this, &USEInventoryWidget::StoreItem);
 	DropDownMenu->GetCombineButtonSignature().AddDynamic(this, &USEInventoryWidget::StartMoveItem);
 	DropDownMenu->GetDropButtonSignature().AddDynamic(this, &USEInventoryWidget::DropItem);
 
 	USEInventoryComponent* CharacterInventory = GetCharacterInventory();
 	if (CharacterInventory != nullptr)
 	{
-		CharacterInventory->OnItemCrafted.AddDynamic(this, &USEInventoryWidget::OnItemCrafted);
+		CharacterInventory->OnItemAdd.AddDynamic(this, &USEInventoryWidget::OnItemAdd);
 	}
 }
 
@@ -293,20 +316,27 @@ void USEInventoryWidget::MoveItemTo(const FIntPoint& Offset)
 	NewPosition.X += Offset.X;
 	NewPosition.Y -= Offset.Y;
 
+	if (CurrentState == ESEInventoryOpenState::Storage && NewPosition.X == -1 && !ItemsStorage->IsEmpty())
+	{
+		MoveCursorToStorage();
+		return;
+	}
+
 	if (!InventorySlots.Contains(NewPosition) || InventorySlots[NewPosition]->GetState() == ESlotState::Block)
 	{
 		return;
 	}
 
-	if (ItemIsMoving)
+	switch (InventoryState)
 	{
-		InventoryCursor->SetPosition(NewPosition);
-	}
-	else
-	{
+	case ESEInventoryState::Selected:
 		SetCurrentUnSelected();
 		InventoryCursor->SetPosition(NewPosition);
 		SetCurrentSelected();
+		break;
+	case ESEInventoryState::ItemMoving:
+		InventoryCursor->SetPosition(NewPosition);
+		break;
 	}
 }
 
@@ -398,13 +428,13 @@ void USEInventoryWidget::SetFastAccess(int32 Index)
 		CharacterInventory->SetFastAccessWeapon(CurrentItemWidget->GetItemData(), Index);
 	}
 
-	ListenForBind = false;
+	InventoryState = ESEInventoryState::Selected;
 	UE_LOG(LogUInventory, Display, TEXT("FastAccess %i"), Index);
 }
 
 void USEInventoryWidget::StopFastAccess()
 {
-	ListenForBind = false;
+	InventoryState = ESEInventoryState::Selected;
 	UE_LOG(LogUInventory, Display, TEXT("Stop FastAccess"));
 }
 
@@ -429,9 +459,8 @@ void USEInventoryWidget::StopMoveItem()
 		if (Result)
 		{
 			InventoryCursor->SetViewState(EViewState::Normal);
-			ItemIsMoving = false;
+			InventoryState = ESEInventoryState::Selected;
 
-			UpdateSlots(); // Need fix
 			SetCurrentSelected();
 		}
 		else
@@ -442,9 +471,20 @@ void USEInventoryWidget::StopMoveItem()
 	else
 	{
 		InventoryCursor->SetViewState(EViewState::Normal);
-		ItemIsMoving = false;
+		InventoryState = ESEInventoryState::Selected;
 
 		CurrentItemWidget->SetViewState(EViewState::Selected);
+
+		USEItemData* ItemData = CurrentItemWidget->GetItemData();
+		FIntPoint Position = ItemData->GetPosition();
+
+		InventorySlots[Position]->SetState(ESlotState::Item);
+
+		if (ItemData->GetItemSize() == 2)
+		{
+			Position.X += 1;
+			InventorySlots[Position]->SetState(ESlotState::Item);
+		}
 	}
 }
 
@@ -457,7 +497,18 @@ void USEInventoryWidget::CancelMoveItem()
 
 	CurrentItemWidget->SetViewState(EViewState::Normal);
 	InventoryCursor->SetViewState(EViewState::Normal);
-	ItemIsMoving = false;
+	InventoryState = ESEInventoryState::Selected;
+
+	USEItemData* ItemData = CurrentItemWidget->GetItemData();
+	FIntPoint Position = ItemData->GetPosition();
+
+	InventorySlots[Position]->SetState(ESlotState::Item);
+
+	if (ItemData->GetItemSize() == 2)
+	{
+		Position.X += 1;
+		InventorySlots[Position]->SetState(ESlotState::Item);
+	}
 
 	SetCurrentSelected();
 }
@@ -488,8 +539,8 @@ void USEInventoryWidget::OpenDropDownMenu()
 	}
 
 	CurrentItemWidget->SetViewState(EViewState::Active);
-	DropDownMenu->Open(CurrentItemWidget->GetItemData(), ForInteraction);
-	DropDownMenuIsOpen = true;
+	DropDownMenu->Open(CurrentItemWidget->GetItemData(), CurrentState);
+	InventoryState = ESEInventoryState::DropDownMenu;
 }
 
 void USEInventoryWidget::CloseDropDownMenu()
@@ -505,12 +556,12 @@ void USEInventoryWidget::CloseDropDownMenu()
 	}
 	
 	DropDownMenu->Close();
-	DropDownMenuIsOpen = false;
+	InventoryState = ESEInventoryState::Selected;
 }
 
 void USEInventoryWidget::StartInspectItem()
 {
-	ItemInspect = true;
+	InventoryState = ESEInventoryState::ItemInspect;
 
 	ASEItemVisual* ItemActor = CurrentItemWidget->GetItemData()->GetItemVisual();
 	ItemActor->SetActorHiddenInGame(false);
@@ -521,13 +572,43 @@ void USEInventoryWidget::StartInspectItem()
 
 void USEInventoryWidget::StopInspectItem()
 {
-	ItemInspect = false;
+	InventoryState = ESEInventoryState::Selected;
 
 	ASEItemVisual* ItemActor = CurrentItemWidget->GetItemData()->GetItemVisual();
 	ItemActor->SetActorHiddenInGame(true);
 
 	InspectPanel->SetVisibility(ESlateVisibility::Collapsed);
 	UE_LOG(LogUInventory, Display, TEXT("StopInspectItem"));
+}
+
+void USEInventoryWidget::MoveCursorToStorage()
+{
+	if (!ItemsStorage->SetFocus())
+	{
+		return;
+	}
+
+	InventoryCursor->SetVisibility(ESlateVisibility::Hidden);
+	SetCurrentUnSelected();
+	
+	InventoryState = ESEInventoryState::Storage;
+	UE_LOG(LogUInventory, Display, TEXT("ToStorage"));
+}
+
+void USEInventoryWidget::MoveCuresorFromStorage()
+{
+	ItemsStorage->ClearFocus();
+
+	InventoryCursor->SetVisibility(ESlateVisibility::Visible);
+	SetCurrentSelected();
+
+	InventoryState = ESEInventoryState::Selected;
+	UE_LOG(LogUInventory, Display, TEXT("FromStorage"));
+}
+
+void USEInventoryWidget::StorageMoveCursor(int32 Value)
+{
+	Value < 0 ? ItemsStorage->MoveDown() : ItemsStorage->MoveUp();
 }
 
 void USEInventoryWidget::StartMoveItem()
@@ -537,14 +618,25 @@ void USEInventoryWidget::StartMoveItem()
 		return;
 	}
 
-	if (DropDownMenuIsOpen)
+	if (InventoryState == ESEInventoryState::DropDownMenu)
 	{
 		CloseDropDownMenu();
 	}
 
-	ItemIsMoving = true;
+	InventoryState = ESEInventoryState::ItemMoving;
 	InventoryCursor->SetViewState(EViewState::Active);
 	CurrentItemWidget->SetViewState(EViewState::Active);
+
+	USEItemData* ItemData = CurrentItemWidget->GetItemData();
+	FIntPoint Position = ItemData->GetPosition();
+
+	InventorySlots[Position]->SetState(ESlotState::Void);
+
+	if (ItemData->GetItemSize() == 2)
+	{
+		Position.X += 1;
+		InventorySlots[Position]->SetState(ESlotState::Void);
+	}
 }
 
 void USEInventoryWidget::ExploreItem()
@@ -573,39 +665,18 @@ void USEInventoryWidget::UseItem()
 		return;
 	}
 
-	if (ForInteraction)
+	switch (CurrentState)
 	{
-		ASEPlayerController* CharacterController = Cast<ASEPlayerController>(GetOwningPlayer());
-		if (CharacterController == nullptr)
-		{
-			return;
-		}
-
-		ASEInteractableTarget* TargetObject = Cast<ASEInteractableTarget>(CharacterController->GetViewTarget());
-		if (TargetObject == nullptr)
-		{
-			return;
-		}
-
-		if (TargetObject->TryUseItem(CurrentItemWidget->GetItemData()->GetItem()))
-		{
-			if (TargetObject->GetRemoveItem())
-			{
-				DropItem();
-			}
-		}
-	}
-	else
-	{
-		USEInventoryComponent* CharacterInventory = GetCharacterInventory();
-		if (CharacterInventory == nullptr)
-		{
-			return;
-		}
-
-		CharacterInventory->UseItem(CurrentItemWidget->GetItemData());
-
-		UpdateHealth();
+	case ESEInventoryOpenState::Base:
+		UseSelfItem();
+		break;
+	case ESEInventoryOpenState::Interaction:
+		UseItemOnObject();
+		break;
+	case ESEInventoryOpenState::Storage:
+		break;
+	default:
+		break;
 	}
 
 	CloseDropDownMenu();
@@ -643,7 +714,7 @@ void USEInventoryWidget::FastAccessWeaponItem()
 	}
 
 	CloseDropDownMenu();
-	ListenForBind = true;
+	InventoryState = ESEInventoryState::ListenBind;
 
 	UE_LOG(LogUInventory, Display, TEXT("FastAccess Start"));
 }
@@ -673,7 +744,31 @@ void USEInventoryWidget::DropItem()
 	UE_LOG(LogUInventory, Display, TEXT("Drop"));
 }
 
-void USEInventoryWidget::OnItemCrafted(USEItemData* NewItemData)
+void USEInventoryWidget::StoreItem()
+{
+	if (CurrentItemWidget == nullptr)
+	{
+		return;
+	}
+	USEItemData* CurrentItem = CurrentItemWidget->GetItemData();
+
+	USEInventoryComponent* CharacterInventory = GetCharacterInventory();
+	if (CharacterInventory == nullptr)
+	{
+		return;
+	}
+
+	CharacterInventory->DropItem(CurrentItem, false);
+	ItemsStorage->AddItem(CurrentItem);
+
+	CurrentItemWidget = nullptr;
+	SetCurrentSelected();
+	CloseDropDownMenu();
+
+	UE_LOG(LogUInventory, Display, TEXT("Store"));
+}
+
+void USEInventoryWidget::OnItemAdd(USEItemData* NewItemData)
 {
 	if (ItemsPanel == nullptr || SlotsGridPanel == nullptr)
 	{
@@ -694,7 +789,41 @@ void USEInventoryWidget::OnItemCrafted(USEItemData* NewItemData)
 
 	InventoryItems.Add(InventorySlotWidget);
 
-	UpdateSlots(); // Need fix
+	UE_LOG(LogUInventory, Display, TEXT("Event item add"));
+	UpdateSlots();
+}
+
+void USEInventoryWidget::UseSelfItem()
+{
+	USEInventoryComponent* CharacterInventory = GetCharacterInventory();
+	if (CharacterInventory == nullptr)
+	{
+		return;
+	}
+
+	CharacterInventory->UseItem(CurrentItemWidget->GetItemData());
+
+	UpdateHealth();
+}
+
+void USEInventoryWidget::UseItemOnObject()
+{
+	ASEPlayerController* CharacterController = Cast<ASEPlayerController>(GetOwningPlayer());
+	if (CharacterController == nullptr)
+	{
+		return;
+	}
+
+	ASEInteractableTarget* TargetObject = Cast<ASEInteractableTarget>(CharacterController->GetViewTarget());
+	if (TargetObject == nullptr)
+	{
+		return;
+	}
+
+	if (TargetObject->TryUseItem(CurrentItemWidget->GetItemData()->GetItem()) && TargetObject->GetRemoveItem())
+	{
+		DropItem();
+	}
 }
 
 void USEInventoryWidget::CreateSlots()
@@ -804,6 +933,7 @@ void USEInventoryWidget::UpdateFastAccessItems()
 			FastAccessItems[i]->SetItemData(nullptr);
 		}
 		FastAccessItems[i]->SetItemData(WeaponData);
+		FastAccessItems[i]->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 

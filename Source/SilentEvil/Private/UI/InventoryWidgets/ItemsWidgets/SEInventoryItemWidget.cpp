@@ -192,4 +192,9 @@ void USEInventoryItemWidget::UpdatePosition()
 
 	GridSlot->SetRow(ItemData->GetPosition().Y);
 	GridSlot->SetColumn(ItemData->GetPosition().X);
+
+	if (ParentWidget != nullptr)
+	{
+		ParentWidget->UpdatePosition(this);
+	}
 }

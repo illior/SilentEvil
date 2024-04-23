@@ -19,6 +19,7 @@ class SILENTEVIL_API USEItemData : public UObject
 
 
 	friend class USEInventoryComponent;
+	friend class ASEPlayerState;
 public:
 	FOnDataChangedSignature OnDataChanged;
 	FOnDropSignature OnDrop;

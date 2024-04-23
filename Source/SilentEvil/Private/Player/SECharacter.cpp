@@ -77,6 +77,7 @@ ASECharacter::ASECharacter(const FObjectInitializer& ObjInit)
 	GetCharacterMovement()->AirControl = 0.35f;
 
 	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+	GetCharacterMovement()->MaxWalkSpeedCrouched = 200.0f;
 }
 
 void ASECharacter::Tick(float DeltaTime)
@@ -409,7 +410,8 @@ void ASECharacter::InputStopAim(const FInputActionValue& Value)
 
 void ASECharacter::InputFastAccessItem(const FInputActionValue& Value)
 {
-	InventoryComponent->FastAccessItem((int32)Value.Get<float>());
+	UE_LOG(LogSECharacter, Display, TEXT("%i"), (int32)Value.Get<float>() - 1);
+	InventoryComponent->FastAccessItem((int32)Value.Get<float>() - 1);
 }
 
 void ASECharacter::InputInteract(const FInputActionValue& Value)

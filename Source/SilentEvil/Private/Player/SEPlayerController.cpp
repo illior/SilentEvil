@@ -73,7 +73,7 @@ void ASEPlayerController::BeginPlay()
 	SetGameMappingContext();
 }
 
-void ASEPlayerController::SetPause()
+void ASEPlayerController::PauseGame()
 {
 	SetInputMode(FInputModeGameAndUI());
 	bShowMouseCursor = true;
@@ -108,7 +108,7 @@ void ASEPlayerController::OpenTargetMenu(bool ShowItems)
 	SetMappingContext(InventoryMenuMappingContext);
 	UE_LOG(LogSEPlayerController, Display, TEXT("Pause Target"));
 
-	SetPause();
+	PauseGame();
 
 	ASEInteractableTarget* ViewTarget = Cast<ASEInteractableTarget>(GetViewTarget());
 	FVector NewPosition = ViewTarget->GetCameraLocation();
@@ -146,7 +146,7 @@ void ASEPlayerController::OpenMap()
 	SetMappingContext(InventoryMenuMappingContext);
 	UE_LOG(LogSEPlayerController, Display, TEXT("Pause Inventory"));
 
-	SetPause();
+	PauseGame();
 }
 
 void ASEPlayerController::OpenInventory()
@@ -177,7 +177,7 @@ void ASEPlayerController::OpenInventory()
 	SetMappingContext(InventoryMenuMappingContext);
 	UE_LOG(LogSEPlayerController, Display, TEXT("Pause Inventory"));
 
-	SetPause();
+	PauseGame();
 }
 
 void ASEPlayerController::OpenRecords()
@@ -208,7 +208,7 @@ void ASEPlayerController::OpenRecords()
 	SetMappingContext(InventoryMenuMappingContext);
 	UE_LOG(LogSEPlayerController, Display, TEXT("Pause Inventory"));
 
-	SetPause();
+	PauseGame();
 }
 
 void ASEPlayerController::OpenMenu()
@@ -239,7 +239,7 @@ void ASEPlayerController::OpenMenu()
 	SetMappingContext(PauseMenuMappingContext);
 	UE_LOG(LogSEPlayerController, Display, TEXT("Pause Menu"));
 
-	SetPause();
+	PauseGame();
 }
 
 void ASEPlayerController::SetGameMappingContext()

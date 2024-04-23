@@ -52,7 +52,7 @@ protected:
 private:
 	FTimerHandle InvokeTimerHandle;
 
-	void SetPause();
+	void PauseGame();
 
 	UFUNCTION()
 	void OpenTargetMenu(bool ShowItems);

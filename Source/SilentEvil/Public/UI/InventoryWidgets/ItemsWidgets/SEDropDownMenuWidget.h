@@ -16,7 +16,7 @@ class SILENTEVIL_API USEDropDownMenuWidget : public UUserWidget
 
 
 public:
-	void Open(USEItemData* ItemData, bool Forinteraction);
+	void Open(USEItemData* ItemData, ESEInventoryOpenState InventoryState);
 	void Close();
 
 	bool IsActive();
@@ -29,6 +29,7 @@ public:
 	FOnDropDownButtonClickedSignature& GetUseButtonSignature();
 	FOnDropDownButtonClickedSignature& GetEquipButtonSignature();
 	FOnDropDownButtonClickedSignature& GetFastAccessButtonSignature();
+	FOnDropDownButtonClickedSignature& GetStoreButtonSignature();
 	FOnDropDownButtonClickedSignature& GetCombineButtonSignature();
 	FOnDropDownButtonClickedSignature& GetDropButtonSignature();
 
@@ -46,6 +47,9 @@ protected:
 	USEDropDownButtonWidget* FastAccessButton;
 
 	UPROPERTY(meta = (BindWidget))
+	USEDropDownButtonWidget* StoreButton;
+
+	UPROPERTY(meta = (BindWidget))
 	USEDropDownButtonWidget* CombineButton;
 
 	UPROPERTY(meta = (BindWidget))
@@ -58,4 +62,8 @@ private:
 
 	UPROPERTY()
 	TArray<USEDropDownButtonWidget*> Buttons;
+
+	void ShowBase(USEItemData* ItemData);
+	void ShowInteraction(USEItemData* ItemData);
+	void ShowStorage(USEItemData* ItemData);
 };

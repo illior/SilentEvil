@@ -32,52 +32,102 @@ bool USEItemData::ContainsPoint(FIntPoint Point) const
 
 FText USEItemData::GetItemName() const
 {
-	return Item == nullptr ? FText() : Item->GetName();
+	if (Item == nullptr)
+	{
+		return FText();
+	}
+
+	return Item->GetName();
 }
 
 FText USEItemData::GetItemDescription() const
 {
-	return Item == nullptr ? FText() : Item->GetDescription();
+	if (Item == nullptr)
+	{
+		return FText();
+	}
+
+	return Item->GetDescription();
 }
 
 bool USEItemData::GetItemCanStack() const
 {
-	return Item == nullptr ? false : Item->GetCanStack();
+	if (Item == nullptr)
+	{
+		return false;
+	}
+
+	return  Item->GetCanStack();
 }
 
 int32 USEItemData::GetItemMaxStackAmount() const
 {
-	return Item == nullptr ? 1 : (Item->GetCanStack() ? Item->GetMaxStackAmount() : 1);
+	if (Item == nullptr)
+	{
+		return 1;
+	}
+
+	return Item->GetCanStack() ? Item->GetMaxStackAmount() : 1;
 }
 
 int32 USEItemData::GetItemSize() const
 {
-	return Item == nullptr ? 1 : Item->GetSize();
+	if (Item == nullptr)
+	{
+		return 1;
+	}
+
+	return Item->GetSize();
 }
 
 UTexture2D* USEItemData::GetItemIcon() const
 {
-	return Item == nullptr ? nullptr : Item->GetIcon();
+	if (Item == nullptr)
+	{
+		return nullptr;
+	}
+
+	return Item->GetIcon();
 }
 
 ASEItemVisual* USEItemData::GetItemVisual() const
 {
-	return Item == nullptr ? nullptr : Item->GetVisual(GetWorld());
+	if (Item == nullptr)
+	{
+		return nullptr;
+	}
+
+	return Item->GetVisual(GetWorld());
 }
 
 bool USEItemData::CanDrop() const
 {
+	if (Item == nullptr)
+	{
+		return false;
+	}
+
 	return true;
 }
 
 bool USEItemData::IsWeapon() const
 {
-	return  Item == nullptr ? false : Item->IsA<USEBaseWeaponItem>();
+	if (Item == nullptr)
+	{
+		return false;
+	}
+
+	return  Item->IsA<USEBaseWeaponItem>();
 }
 
 bool USEItemData::IsFull() const
 {
-	return  Item == nullptr ? false : Count == Item->GetMaxStackAmount();
+	if (Item == nullptr)
+	{
+		return false;
+	}
+
+	return Item->GetCanStack() ? Count == Item->GetMaxStackAmount() : true;
 }
 
 FString USEItemData::ToString() const
@@ -101,6 +151,7 @@ void USEItemData::SetPosition(const int& X, const int& Y)
 void USEItemData::SetCount(int32 NewCount)
 {
 	Count = FMath::Clamp(NewCount, 0.0f, GetItemMaxStackAmount());
+
 	OnDataChanged.Broadcast();
 }
 

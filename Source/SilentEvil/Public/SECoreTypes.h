@@ -29,6 +29,23 @@ struct FItemsCraft
 };
 
 UENUM(BlueprintType)
+enum class ESEInventoryOpenState : uint8 {
+	Base		UMETA(DisplayName = "Base"),
+	Interaction	UMETA(DisplayName = "Interaction"),
+	Storage		UMETA(DisplayName = "Storage"),
+};
+
+UENUM(BlueprintType)
+enum class ESEInventoryState : uint8 {
+	Selected,
+	DropDownMenu,
+	ItemMoving,
+	ListenBind,
+	ItemInspect,
+	Storage
+};
+
+UENUM(BlueprintType)
 enum class ESlotState : uint8 {
 	Void	UMETA(DisplayName = "Void"),
 	Item	UMETA(DisplayName = "Item"),
@@ -38,31 +55,31 @@ enum class ESlotState : uint8 {
 UENUM(BlueprintType)
 enum class EGameState : uint8
 {
-	InProgress UMETA(DisplayName = "InProgress"),
-	InPause UMETA(DisplayName = "InPause"),
-	InInventroy UMETA(DisplayName = "InInventroy")
+	InProgress	UMETA(DisplayName = "InProgress"),
+	InPause		UMETA(DisplayName = "InPause"),
+	InInventroy	UMETA(DisplayName = "InInventroy")
 };
 
 UENUM(BlueprintType)
 enum class ESEButtonState : uint8
 {
-	Normal UMETA(DisplayName = "Normal"),
-	Hovered UMETA(DisplayName = "Hover"),
-	Pressed UMETA(DisplayName = "Pressed"),
-	Disabled UMETA(DisplayName = "Disable")
+	Normal		UMETA(DisplayName = "Normal"),
+	Hovered		UMETA(DisplayName = "Hover"),
+	Pressed		UMETA(DisplayName = "Pressed"),
+	Disabled	UMETA(DisplayName = "Disable")
 };
 
 UENUM(BlueprintType)
 enum class EViewState : uint8
 {
-	Normal UMETA(DisplayName = "Normal"),
-	Selected UMETA(DisplayName = "Hover"),
-	Active UMETA(DisplayName = "Disable")
+	Normal		UMETA(DisplayName = "Normal"),
+	Selected	UMETA(DisplayName = "Hover"),
+	Active		UMETA(DisplayName = "Disable")
 };
 
 UENUM(BlueprintType)
 enum class EAmmoType : uint8
 {
-	Pistol UMETA(DisplayName = "Pistol"),
-	Shotgun UMETA(DisplayName = "Shotgun")
+	Pistol	UMETA(DisplayName = "Pistol"),
+	Shotgun	UMETA(DisplayName = "Shotgun")
 };

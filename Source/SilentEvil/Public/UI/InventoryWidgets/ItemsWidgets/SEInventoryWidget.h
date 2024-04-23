@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SECoreTypes.h"
 #include "UI/InventoryWidgets/SEBaseWidget.h"
 #include "SEInventoryWidget.generated.h"
 
@@ -17,6 +18,7 @@ class USEInventoryCursorWidget;
 class USEDropDownMenuWidget;
 class USEInspectWidget;
 class USEInventoryComponent;
+class USEItemsStorageWidget;
 
 UCLASS()
 class SILENTEVIL_API USEInventoryWidget : public USEBaseWidget
@@ -35,6 +37,7 @@ public:
 	void UpdateInventoryData(bool OpenForInteraction = false);
 
 	void RemoveItem(USEInventoryItemWidget* ItemWidget);
+	void UpdatePosition(USEInventoryItemWidget* ItemWidget);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
@@ -70,15 +73,14 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UCanvasPanel* FirstAccessItemsPanel;
 
+	UPROPERTY(meta = (BindWidget))
+	USEItemsStorageWidget* ItemsStorage;
+
 	virtual void NativeOnInitialized() override;
 
 private:
-	bool ForInteraction = false;
-
-	bool DropDownMenuIsOpen = false;
-	bool ItemIsMoving = false;
-	bool ListenForBind = false;
-	bool ItemInspect = false;
+	ESEInventoryOpenState CurrentState = ESEInventoryOpenState::Base;
+	ESEInventoryState InventoryState = ESEInventoryState::Selected;
 
 	UPROPERTY()
 	USEInventoryItemWidget* CurrentItemWidget = nullptr;
@@ -110,6 +112,11 @@ private:
 	void StartInspectItem();
 	void StopInspectItem();
 
+	void MoveCursorToStorage();
+	void MoveCuresorFromStorage();
+
+	void StorageMoveCursor(int32 Value);
+
 	UFUNCTION()
 	void StartMoveItem();
 	UFUNCTION()
@@ -122,9 +129,14 @@ private:
 	void FastAccessWeaponItem();
 	UFUNCTION()
 	void DropItem();
+	UFUNCTION()
+	void StoreItem();
 
 	UFUNCTION()
-	void OnItemCrafted(USEItemData* NewItemData);
+	void OnItemAdd(USEItemData* NewItemData);
+
+	void UseSelfItem();
+	void UseItemOnObject();
 
 	void CreateSlots();
 	void UpdateSlots();

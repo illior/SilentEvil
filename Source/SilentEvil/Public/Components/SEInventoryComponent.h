@@ -15,7 +15,7 @@ class UDataTable;
 struct FSEReadableRecord;
 struct FInputActionValue;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemCraftedSignature, USEItemData*, CreatedItem);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemAddSignature, USEItemData*, NewItem);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SILENTEVIL_API USEInventoryComponent : public UActorComponent
@@ -26,7 +26,7 @@ class SILENTEVIL_API USEInventoryComponent : public UActorComponent
 public:
 	USEInventoryComponent();
 
-	FOnItemCraftedSignature OnItemCrafted;
+	FOnItemAddSignature OnItemAdd;
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	FIntPoint GetMaxSize() const;
@@ -47,10 +47,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void UseItem(USEItemData* ItemData);
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	bool DropItem(USEItemData* ItemData);
+	bool DropItem(USEItemData* ItemData, bool IsGarbage = true);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool TryAddItem(USEBaseItem* Item, int32& Count);
+	bool TryAddItem(USEItemData* ItemData);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void AddRecord(FName RowName);
@@ -109,7 +110,8 @@ private:
 	void Initialize();
 
 	USEItemData* CreateItemData(USEBaseItem* Item, const int32& X, const int32& Y, const int32& Count = 1);
-	void DestroyItem(USEItemData* ItemData);
+	void AddItemData(USEItemData* ItemData);
+	void DestroyItem(USEItemData* ItemData, bool IsGarbage = true);
 
 	bool MoveShortItem(USEItemData* ItemData, const int32& X, const int32& Y);
 	bool MoveLongItem(USEItemData* ItemData, const int32& X, const int32& Y);

@@ -8,7 +8,7 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogDropDownMenu, All, All);
 
-void USEDropDownMenuWidget::Open(USEItemData* ItemData, bool ForInteraction)
+void USEDropDownMenuWidget::Open(USEItemData* ItemData, ESEInventoryOpenState InventoryState)
 {
 	SetVisibility(ESlateVisibility::Visible);
 
@@ -18,62 +18,20 @@ void USEDropDownMenuWidget::Open(USEItemData* ItemData, bool ForInteraction)
 		Button->SetDisable();
 	}
 
-	if (ForInteraction)
+	switch (InventoryState)
 	{
-		ExploreButton->SetVisibility(ESlateVisibility::Visible);
-		ExploreButton->SetNormal();
-
-		UseButton->SetVisibility(ESlateVisibility::Visible);
-		UseButton->SetNormal();
-
-		CombineButton->SetVisibility(ESlateVisibility::Visible);
-		CombineButton->SetNormal();
+	case ESEInventoryOpenState::Base:
+		ShowBase(ItemData);
+		break;
+	case ESEInventoryOpenState::Interaction:
+		ShowInteraction(ItemData);
+		break;
+	case ESEInventoryOpenState::Storage:
+		ShowStorage(ItemData);
+		break;
+	default:
+		break;
 	}
-	else
-	{
-		ExploreButton->SetVisibility(ESlateVisibility::Visible);
-		ExploreButton->SetNormal();
-
-		CombineButton->SetVisibility(ESlateVisibility::Visible);
-		CombineButton->SetNormal();
-
-		DropButton->SetVisibility(ESlateVisibility::Visible);
-		if (ItemData->CanDrop())
-		{
-			DropButton->SetNormal();
-		}
-
-		if (ItemData->GetItem()->Implements<USEUsableItemInterface>())
-		{
-			ISEUsableItemInterface* UsableItem = Cast<ISEUsableItemInterface>(ItemData->GetItem());
-
-			UseButton->SetVisibility(ESlateVisibility::Visible);
-			if (UsableItem->CanUse(GetOwningPlayerPawn()))
-			{
-				UseButton->SetNormal();
-			}
-			else
-			{
-				UseButton->SetDisable();
-			}
-
-		}
-
-		if (ItemData->IsWeapon())
-		{
-			EquipButton->SetVisibility(ESlateVisibility::Visible);
-			EquipButton->SetNormal();
-
-			FastAccessButton->SetVisibility(ESlateVisibility::Visible);
-			FastAccessButton->SetNormal();
-
-			DropButton->SetVisibility(ESlateVisibility::Collapsed);
-			DropButton->SetDisable();
-		}
-	}
-
-	CurrentIndex = 0;
-	Buttons[CurrentIndex]->SetHover();
 }
 
 void USEDropDownMenuWidget::Close()
@@ -152,6 +110,11 @@ FOnDropDownButtonClickedSignature& USEDropDownMenuWidget::GetFastAccessButtonSig
 	return FastAccessButton->OnClicked;
 }
 
+FOnDropDownButtonClickedSignature& USEDropDownMenuWidget::GetStoreButtonSignature()
+{
+	return StoreButton->OnClicked;
+}
+
 FOnDropDownButtonClickedSignature& USEDropDownMenuWidget::GetCombineButtonSignature()
 {
 	return CombineButton->OnClicked;
@@ -170,6 +133,80 @@ void USEDropDownMenuWidget::NativeOnInitialized()
 	Buttons.Add(UseButton);
 	Buttons.Add(EquipButton);
 	Buttons.Add(FastAccessButton);
+	Buttons.Add(StoreButton);
 	Buttons.Add(CombineButton);
 	Buttons.Add(DropButton);
+}
+
+void USEDropDownMenuWidget::ShowBase(USEItemData* ItemData)
+{
+	ExploreButton->SetVisibility(ESlateVisibility::Visible);
+	ExploreButton->SetNormal();
+
+	CombineButton->SetVisibility(ESlateVisibility::Visible);
+	CombineButton->SetNormal();
+
+	DropButton->SetVisibility(ESlateVisibility::Visible);
+	if (ItemData->CanDrop())
+	{
+		DropButton->SetNormal();
+	}
+
+	if (ItemData->GetItem()->Implements<USEUsableItemInterface>())
+	{
+		ISEUsableItemInterface* UsableItem = Cast<ISEUsableItemInterface>(ItemData->GetItem());
+
+		UseButton->SetVisibility(ESlateVisibility::Visible);
+		if (UsableItem->CanUse(GetOwningPlayerPawn()))
+		{
+			UseButton->SetNormal();
+		}
+		else
+		{
+			UseButton->SetDisable();
+		}
+
+	}
+
+	if (ItemData->IsWeapon())
+	{
+		EquipButton->SetVisibility(ESlateVisibility::Visible);
+		EquipButton->SetNormal();
+
+		FastAccessButton->SetVisibility(ESlateVisibility::Visible);
+		FastAccessButton->SetNormal();
+
+		DropButton->SetVisibility(ESlateVisibility::Collapsed);
+		DropButton->SetDisable();
+	}
+
+	CurrentIndex = 0;
+	Buttons[CurrentIndex]->SetHover();
+}
+
+void USEDropDownMenuWidget::ShowInteraction(USEItemData* ItemData)
+{
+	ExploreButton->SetVisibility(ESlateVisibility::Visible);
+	ExploreButton->SetNormal();
+
+	UseButton->SetVisibility(ESlateVisibility::Visible);
+	UseButton->SetNormal();
+
+	CombineButton->SetVisibility(ESlateVisibility::Visible);
+	CombineButton->SetNormal();
+
+	CurrentIndex = 0;
+	Buttons[CurrentIndex]->SetHover();
+}
+
+void USEDropDownMenuWidget::ShowStorage(USEItemData* ItemData)
+{
+	StoreButton->SetVisibility(ESlateVisibility::Visible);
+	StoreButton->SetNormal();
+
+	CombineButton->SetVisibility(ESlateVisibility::Visible);
+	CombineButton->SetNormal();
+
+	CurrentIndex = 4;
+	Buttons[CurrentIndex]->SetHover();
 }
