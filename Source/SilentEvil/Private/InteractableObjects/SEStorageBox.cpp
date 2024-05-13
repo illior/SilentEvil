@@ -26,23 +26,3 @@ void ASEStorageBox::Interact(APawn* Pawn)
 
 	ReceiveInteract(Pawn);
 }
-
-void ASEStorageBox::MoveVertical(const float& Value)
-{
-	Super::MoveVertical(Value);
-}
-
-void ASEStorageBox::MoveHorizontal(const float& Value)
-{
-	Super::MoveHorizontal(Value);
-}
-
-void ASEStorageBox::Apply()
-{
-	Super::Apply();
-}
-
-void ASEStorageBox::Close()
-{
-	Super::Close();
-}

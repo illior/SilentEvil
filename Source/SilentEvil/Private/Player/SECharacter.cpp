@@ -2,7 +2,7 @@
 
 #include "Player/SECharacter.h"
 
-#include "Camera/CameraComponent.h"
+#include "Components/SECameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -10,6 +10,7 @@
 #include "Components/SEInventoryComponent.h"
 #include "Components/SEHealthComponent.h"
 #include "Components/SECharacterMovementComponent.h"
+#include "SaveSystem/SESavableComponent.h"
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -54,7 +55,7 @@ ASECharacter::ASECharacter(const FObjectInitializer& ObjInit)
 	SpringArmComponent->CameraRotationLagSpeed = 30.0f;
 
 	// Camera
-	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CharacterCamera"));
+	CameraComponent = CreateDefaultSubobject<USECameraComponent>(TEXT("CharacterCamera"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
 	CameraComponent->bUsePawnControlRotation = false;
 
@@ -78,6 +79,64 @@ ASECharacter::ASECharacter(const FObjectInitializer& ObjInit)
 
 	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 200.0f;
+}
+
+FSESaveDataRecord ASECharacter::GetSaveDataRecord_Implementation()
+{
+	FSESaveDataRecord Record = FSESaveDataRecord();
+
+	Record.ActorClass = GetClass();
+	Record.ActorName = GetName();
+	Record.ActorTransform = GetTransform();
+
+	ControlRotation = GetControlRotation();
+
+	ComponentsData.Empty();
+	TArray<UActorComponent*> SavableComponents = GetComponentsByInterface(USESavableComponent::StaticClass());
+	if (SavableComponents.Num() != 0)
+	{
+		for (UActorComponent* SavableComponent : SavableComponents)
+		{
+			ComponentsData.Add(ISESavableComponent::Execute_GetSaveData(SavableComponent));
+		}
+	}
+
+	FMemoryWriter Writer = FMemoryWriter(Record.BinaryData);
+	FObjectAndNameAsStringProxyArchive Ar(Writer, false);
+	Ar.ArIsSaveGame = true;
+
+	Serialize(Ar);
+
+	return Record;
+}
+
+void ASECharacter::LoadFromSaveDataRecord_Implementation(FSESaveDataRecord InRecord)
+{
+	SetActorTransform(InRecord.ActorTransform);
+
+	FMemoryReader Reader = FMemoryReader(InRecord.BinaryData);
+	FObjectAndNameAsStringProxyArchive Ar(Reader, false);
+	Ar.ArIsSaveGame = true;
+
+	Serialize(Ar);
+
+	GetController()->SetControlRotation(ControlRotation);
+
+	TArray<UActorComponent*> SavableComponents = GetComponentsByInterface(USESavableComponent::StaticClass());
+	if (SavableComponents.Num() != 0)
+	{
+		for (UActorComponent* SavableComponent : SavableComponents)
+		{
+			for (int i = 0; i < ComponentsData.Num(); i++)
+			{
+				if (SavableComponent->GetName() == ComponentsData[i].ComponentName)
+				{
+					ISESavableComponent::Execute_LoadFromSaveData(SavableComponent, ComponentsData[i]);
+					break;
+				}
+			}
+		}
+	}
 }
 
 void ASECharacter::Tick(float DeltaTime)
@@ -127,7 +186,7 @@ float ASECharacter::GetDistanceForInteraction() const
 	return CloseDistanceInteraction;
 }
 
-UCameraComponent* ASECharacter::GetCameraComponent() const
+USECameraComponent* ASECharacter::GetCameraComponent() const
 {
 	return CameraComponent;
 }
@@ -249,8 +308,6 @@ void ASECharacter::InputStartMove(const FInputActionValue& Value)
 	{
 		CameraShakeInstance = PlayerController->PlayerCameraManager->StartCameraShake(CameraWalkShake);
 	}
-
-	//UE_LOG(LogSECharacter, Display, TEXT("StartMove"));
 }
 
 void ASECharacter::InputStopMove(const FInputActionValue& Value)
@@ -271,8 +328,6 @@ void ASECharacter::InputStopMove(const FInputActionValue& Value)
 		PlayerController->PlayerCameraManager->StopCameraShake(CameraShakeInstance);
 		CameraShakeInstance = nullptr;
 	}
-
-	//UE_LOG(LogSECharacter, Display, TEXT("StopMove"));
 }
 
 void ASECharacter::InputMove(const FInputActionValue& Value)
@@ -320,8 +375,6 @@ void ASECharacter::InputCrouch(const FInputActionValue& Value)
 
 void ASECharacter::StartCrouch()
 {
-	UE_LOG(LogSECharacter, Display, TEXT("StartCrouch %s"), GetCharacterMovement()->IsCrouching() ? TEXT("true") :  TEXT("false"));
-
 	Crouch();
 
 	if (ShouldSprint)
@@ -332,8 +385,6 @@ void ASECharacter::StartCrouch()
 
 void ASECharacter::StopCrouch()
 {
-	UE_LOG(LogSECharacter, Display, TEXT("StopCrouch %s"), GetCharacterMovement()->IsCrouching() ? TEXT("true") : TEXT("false"));
-
 	UnCrouch();
 }
 
@@ -410,7 +461,6 @@ void ASECharacter::InputStopAim(const FInputActionValue& Value)
 
 void ASECharacter::InputFastAccessItem(const FInputActionValue& Value)
 {
-	UE_LOG(LogSECharacter, Display, TEXT("%i"), (int32)Value.Get<float>() - 1);
 	InventoryComponent->FastAccessItem((int32)Value.Get<float>() - 1);
 }
 

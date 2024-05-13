@@ -9,6 +9,7 @@
 
 #include "SEGameModeBase.h"
 #include "InteractableObjects/SEInteractableTarget.h"
+#include "UI/SESubmenuWidget.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSEPlayerController, All, All);
 
@@ -53,6 +54,20 @@ void ASEPlayerController::SetInteractTarget(ASEInteractableTarget* Target, bool 
 	GetWorldTimerManager().SetTimer(InvokeTimerHandle, TimerDelegate, BlendTime + 0.05f, false);
 }
 
+void ASEPlayerController::SetInteractTarget(ASEInteractableTarget* Target, USESubmenuWidget* WidgetToFocus)
+{
+	if (Target == nullptr || GetPawn() == nullptr || WidgetToFocus == nullptr)
+	{
+		return;
+	}
+
+	SetViewTargetWithBlend(Target, BlendTime);
+
+	FTimerDelegate TimerDelegate;
+	TimerDelegate.BindUFunction(this, FName("OpenTargetWidget"), WidgetToFocus);
+	GetWorldTimerManager().SetTimer(InvokeTimerHandle, TimerDelegate, BlendTime + 0.05f, false);
+}
+
 void ASEPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -70,12 +85,17 @@ void ASEPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SetInputMode(FInputModeGameOnly());
+	bShowMouseCursor = false;
 	SetGameMappingContext();
 }
 
 void ASEPlayerController::PauseGame()
 {
-	SetInputMode(FInputModeGameAndUI());
+	FInputModeGameAndUI InputMode = FInputModeGameAndUI();
+	InputMode.SetHideCursorDuringCapture(false);
+
+	SetInputMode(InputMode);
 	bShowMouseCursor = true;
 	PlayerCameraManager->StopAllCameraShakes();
 }
@@ -103,9 +123,49 @@ void ASEPlayerController::OpenTargetMenu(bool ShowItems)
 	{
 		return;
 	}
+
 	SEHUD->OpenTargetInventory(ShowItems);
 
 	SetMappingContext(InventoryMenuMappingContext);
+	UE_LOG(LogSEPlayerController, Display, TEXT("Pause Target"));
+
+	PauseGame();
+
+	ASEInteractableTarget* ViewTarget = Cast<ASEInteractableTarget>(GetViewTarget());
+	FVector NewPosition = ViewTarget->GetCameraLocation();
+	NewPosition.Z = GetPawn()->GetActorLocation().Z;
+	GetPawn()->SetActorLocation(NewPosition);
+
+	SetControlRotation(ViewTarget->GetCameraRotation());
+}
+
+void ASEPlayerController::OpenTargetWidget(USESubmenuWidget* WidgetToFocus)
+{
+	if (GetWorld() == nullptr || GetWorld()->GetAuthGameMode() == nullptr)
+	{
+		return;
+	}
+
+	ASEGameModeBase* GameMode = Cast<ASEGameModeBase>(GetWorld()->GetAuthGameMode());
+	if (GameMode == nullptr)
+	{
+		return;
+	}
+
+	if (!GameMode->SetInventoryPause(this))
+	{
+		return;
+	}
+
+	ASEGameHUD* SEHUD = Cast<ASEGameHUD>(MyHUD);
+	if (SEHUD == nullptr)
+	{
+		return;
+	}
+
+	SEHUD->OpenTargetWiget(WidgetToFocus);
+
+	SetMappingContext(PauseMenuMappingContext);
 	UE_LOG(LogSEPlayerController, Display, TEXT("Pause Target"));
 
 	PauseGame();

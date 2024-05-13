@@ -10,6 +10,7 @@ class UInputMappingContext;
 class UInputAction;
 
 class ASEInteractableTarget;
+class USESubmenuWidget;
 
 UCLASS()
 class SILENTEVIL_API ASEPlayerController : public APlayerController
@@ -22,6 +23,7 @@ public:
 	void ResumeGame();
 
 	void SetInteractTarget(ASEInteractableTarget* Target, bool ShowItems = false);
+	void SetInteractTarget(ASEInteractableTarget* Target, USESubmenuWidget* WidgetToFocus);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
@@ -56,6 +58,9 @@ private:
 
 	UFUNCTION()
 	void OpenTargetMenu(bool ShowItems);
+
+	UFUNCTION()
+	void OpenTargetWidget(USESubmenuWidget* WidgetToFocus);
 
 	void OpenMap();
 	void OpenInventory();

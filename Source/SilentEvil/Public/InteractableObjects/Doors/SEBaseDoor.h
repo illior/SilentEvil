@@ -18,9 +18,6 @@ class SILENTEVIL_API ASEBaseDoor : public ASEInteractableObject
 public:
 	ASEBaseDoor();
 
-	virtual void StartCanInteract(APawn* Pawn) override;
-	virtual void StopCanInteract(APawn* Pawn) override;
-
 	virtual void Interact(APawn* Pawn) override;
 
 	virtual FVector GetTargetLocation(AActor* RequestedBy = nullptr) const override;
@@ -38,27 +35,28 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UTimelineComponent* TimeLine;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-	bool IsDoorLocked = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Interaction")
 	UCurveFloat* CurveMovement = nullptr;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Interaction")
-	float OpenAngle = 80.0f;
-
-	float TargetAngle = 0.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
 	bool IsOpen = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
 	bool IsMove = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "Interaction")
+	bool IsDoorLocked;
 
-	virtual void Disable() override;
-	virtual void Enable() override;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Interaction")
+	float OpenAngle = 80.0f;
+
+	float TargetAngle = 0.0f;
 
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
 	virtual void Open(APawn* Pawn);
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
 	virtual void Close();
+
+	virtual void Disable() override;
+	virtual void Enable() override;
 
 	virtual void BeginPlay() override;
 
@@ -69,5 +67,5 @@ private:
 	void StopMoveDoor();
 
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
-	float GetAngle(FVector PawnLocation);
+	float GetAngle(FVector PawnLocation) const;
 };

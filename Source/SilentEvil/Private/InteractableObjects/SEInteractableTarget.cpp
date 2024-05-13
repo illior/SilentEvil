@@ -4,6 +4,7 @@
 
 #include "Camera/CameraComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Components/CapsuleComponent.h"
 
 #include "Player/SEPlayerController.h"
 #include "UI/SEGameHUD.h"
@@ -18,16 +19,6 @@ ASEInteractableTarget::ASEInteractableTarget()
 	CameraComponent->SetupAttachment(GetRootComponent());
 
 	DisableAfterInteract = true;
-}
-
-void ASEInteractableTarget::StartCanInteract(APawn* Pawn)
-{
-	Super::StartCanInteract(Pawn);
-}
-
-void ASEInteractableTarget::StopCanInteract(APawn* Pawn)
-{
-	Super::StopCanInteract(Pawn);
 }
 
 void ASEInteractableTarget::Interact(APawn* Pawn)
@@ -48,6 +39,21 @@ void ASEInteractableTarget::Interact(APawn* Pawn)
 	ReceiveInteract(Pawn);
 }
 
+void ASEInteractableTarget::SetEnabled(bool NewValue)
+{
+	IsEnabled = NewValue;
+
+	IsEnabled ? Enable() : Disable();
+}
+
+void ASEInteractableTarget::Close()
+{
+	ReceiveClose();
+
+	Enable();
+	StopCanInteract(CurrentPawn);
+}
+
 void ASEInteractableTarget::MoveVertical(const float& Value)
 {
 	ReceiveMoveVertical(Value);
@@ -61,16 +67,6 @@ void ASEInteractableTarget::MoveHorizontal(const float& Value)
 void ASEInteractableTarget::Apply()
 {
 	ReceiveApply();
-}
-
-void ASEInteractableTarget::Close()
-{
-	WidgetComponent->SetVisibility(true);
-
-	ReceiveClose();
-
-	Enable();
-	StopCanInteract(CurrentPawn);
 }
 
 bool ASEInteractableTarget::TryUseItem(USEBaseItem* InItem)
@@ -152,12 +148,26 @@ void ASEInteractableTarget::Complete()
 
 	PlayerController->ResumeGame();
 
-	if (!DisableAfterInteract)
+	if (DisableAfterInteract)
 	{
-		Enable();
+		SetEnabled(false);
 	}
 
 	OnComplete.Broadcast(this, CurrentPawn);
 
 	StopCanInteract(CurrentPawn);
+}
+
+void ASEInteractableTarget::Disable()
+{
+	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	ReceiveDisable();
+}
+
+void ASEInteractableTarget::Enable()
+{
+	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
+	ReceiveEnable();
 }

@@ -6,7 +6,9 @@
 #include "GameFramework/HUD.h"
 #include "SEGameHUD.generated.h"
 
+class USESubmenuWidget;
 class USEInventoryContainerWidget;
+class USEPauseMenuWidget;
 class USEPlayerHUDWidget;
 
 UCLASS()
@@ -23,6 +25,8 @@ public:
 
 	void OpenMap();
 
+	void OpenTargetWiget(USESubmenuWidget* WidgetToFocus);
+
 	void OpenMenu();
 	
 	void Close();
@@ -37,7 +41,7 @@ protected:
 	TSubclassOf<USEInventoryContainerWidget> InventoryWidgetClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<UUserWidget> PauseMenuWidgetClass;
+	TSubclassOf<USEPauseMenuWidget> PauseMenuWidgetClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UUserWidget> PlayerHUDWidgetClass;
@@ -46,13 +50,11 @@ protected:
 	USEInventoryContainerWidget* InventoryWidget;
 
 	UPROPERTY()
-	UUserWidget* PauseMenuWidget;
+	USEPauseMenuWidget* PauseMenuWidget;
 
 	UPROPERTY()
 	USEPlayerHUDWidget* PlayerHUDWidget;
 
 	virtual void BeginPlay() override;
-
-private:
 
 };

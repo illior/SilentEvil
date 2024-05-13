@@ -4,14 +4,16 @@
 
 #include "Player/SECharacter.h"
 
+#include "UI/WidgetComponents/SEInteractWidget.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Components/SECameraComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSEInteractableObject, All, All);
 
 ASEInteractableObject::ASEInteractableObject()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	SceneComponent = CreateDefaultSubobject<USceneComponent>("Root");
 	SetRootComponent(SceneComponent);
@@ -52,6 +54,7 @@ void ASEInteractableObject::StartCanInteract(APawn* Pawn)
 		ASECharacter* Character = Cast<ASECharacter>(Pawn);
 
 		DistanceToInteract = Character->GetDistanceForInteraction();
+		ShowKey = true;
 	}
 
 	CurrentPawn = Pawn;
@@ -62,6 +65,11 @@ void ASEInteractableObject::StartCanInteract(APawn* Pawn)
 void ASEInteractableObject::StopCanInteract(APawn* Pawn)
 {
 	WidgetComponent->SetVisibility(false);
+
+	if (Pawn->IsA<ASECharacter>())
+	{
+		ShowKey = false;
+	}
 
 	CurrentPawn = nullptr;
 
@@ -81,6 +89,65 @@ void ASEInteractableObject::SetEnabled(bool NewValue)
 FVector ASEInteractableObject::GetTargetLocation(AActor* RequestedBy) const
 {
 	return CollisionComponent->GetComponentLocation();
+}
+
+FSESaveDataRecord ASEInteractableObject::GetSaveDataRecord_Implementation()
+{
+	FSESaveDataRecord Record = FSESaveDataRecord();
+
+	Record.ActorClass = GetClass();
+	Record.ActorName = GetName();
+	Record.ActorTransform = GetTransform();
+
+	FMemoryWriter Writer = FMemoryWriter(Record.BinaryData);
+	FObjectAndNameAsStringProxyArchive Ar(Writer, false);
+	Ar.ArIsSaveGame = true;
+
+	Serialize(Ar);
+
+	return Record;
+}
+
+void ASEInteractableObject::LoadFromSaveDataRecord_Implementation(FSESaveDataRecord InRecord)
+{
+	SetActorTransform(InRecord.ActorTransform);
+
+	FMemoryReader Reader = FMemoryReader(InRecord.BinaryData);
+	FObjectAndNameAsStringProxyArchive Ar(Reader, false);
+	Ar.ArIsSaveGame = true;
+
+	Serialize(Ar);
+}
+
+void ASEInteractableObject::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (!ShowKey)
+	{
+		return;
+	}
+
+	USEInteractWidget* InteractWidget = Cast<USEInteractWidget>(WidgetComponent->GetUserWidgetObject());
+	if (InteractWidget == nullptr)
+	{
+		return;
+	}
+
+	InteractWidget->SetVisibleKey(GetDistance() < DistanceToInteract);
+}
+
+float ASEInteractableObject::GetDistance() const
+{
+	ASECharacter* Character = Cast<ASECharacter>(CurrentPawn);
+	if (Character != nullptr)
+	{
+		FVector CameraLocation = Character->GetCameraComponent()->GetComponentLocation();
+
+		return FVector::Distance(CameraLocation, GetTargetLocation());
+	}
+
+	return 0.0f;
 }
 
 void ASEInteractableObject::Disable()
@@ -103,8 +170,11 @@ void ASEInteractableObject::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (!IsEnabled)
+	USEInteractWidget* InteractWidget = Cast<USEInteractWidget>(WidgetComponent->GetUserWidgetObject());
+	if (InteractWidget != nullptr)
 	{
-		Disable();
+		InteractWidget->SetVisibleKey(false);
 	}
+
+	IsEnabled ? Enable() : Disable();
 }

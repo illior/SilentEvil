@@ -23,6 +23,90 @@ USEInventoryComponent::USEInventoryComponent()
 
 }
 
+FSESaveDataComponent USEInventoryComponent::GetSaveData_Implementation()
+{
+	FSESaveDataComponent Record = FSESaveDataComponent();
+
+	SaveItems.Empty();
+	for (USEItemData* ItemData : Items)
+	{
+		FSESaveItemData SaveItem;
+
+		if (ItemData->IsWeapon())
+		{
+			USEWeaponData* WeaponData = Cast<USEWeaponData>(ItemData);
+
+			SaveItem = FSESaveItemData(WeaponData);
+		}
+		else
+		{
+			SaveItem = FSESaveItemData(ItemData);
+		}
+
+		SaveItems.Add(SaveItem);
+	}
+
+	Record.ComponentName = GetName();
+
+	FMemoryWriter Writer = FMemoryWriter(Record.BinaryData);
+	FObjectAndNameAsStringProxyArchive Ar(Writer, false);
+	Ar.ArIsSaveGame = true;
+
+	Serialize(Ar);
+
+	return Record;
+}
+
+void USEInventoryComponent::LoadFromSaveData_Implementation(FSESaveDataComponent InRecord)
+{
+	FMemoryReader Reader = FMemoryReader(InRecord.BinaryData);
+	FObjectAndNameAsStringProxyArchive Ar(Reader, false);
+	Ar.ArIsSaveGame = true;
+
+	Serialize(Ar);
+
+	CreateFastAccessArray();
+	Items.Empty();
+	for (FSESaveItemData SaveItem : SaveItems)
+	{
+		if (SaveItem.Item->IsA<USEBaseWeaponItem>())
+		{
+			USEWeaponData* WeaponData = NewObject<USEWeaponData>(this);
+
+			WeaponData->Item = SaveItem.Item;
+			WeaponData->Count = SaveItem.Count;
+			WeaponData->Position = SaveItem.Position;
+
+			WeaponData->CurrentAmmoInClip = SaveItem.AmmoInClip;
+
+			Items.Add(WeaponData);
+
+			if (SaveItem.FastAccessIndex > -1)
+			{
+				SetFastAccessWeapon(WeaponData, SaveItem.FastAccessIndex);
+			}
+
+			if (SaveItem.IsEquip)
+			{
+				SetEquipWeapon(WeaponData);
+			}
+		}
+		else
+		{
+			USEItemData* ItemData = NewObject<USEItemData>(this);
+
+			ItemData->Item = SaveItem.Item;
+			ItemData->Count = SaveItem.Count;
+			ItemData->Position = SaveItem.Position;
+
+			Items.Add(ItemData);
+		}
+	}
+	SaveItems.Empty();
+
+	UE_LOG(LogCharacterInventory, Display, TEXT("LoadFromSaveData"));
+}
+
 FIntPoint USEInventoryComponent::GetMaxSize() const
 {
 	return MaxSize;
@@ -316,10 +400,10 @@ bool USEInventoryComponent::TryAddItem(USEItemData* ItemData)
 
 void USEInventoryComponent::AddRecord(FName RowName)
 {
-	/*if (Records.Contains(RowName))
+	if (Records.Contains(RowName))
 	{
 		return;
-	}*/
+	}
 
 	if (RecordsTable == nullptr)
 	{
@@ -521,7 +605,16 @@ void USEInventoryComponent::Initialize()
 		TryAddAmmo(Items[i]);
 	}
 
+	if (FastAccessWeapons.Num() != 4)
+	{
+		CreateFastAccessArray();
+	}
+}
+
+void USEInventoryComponent::CreateFastAccessArray()
+{
 	FastAccessWeapons.Empty();
+
 	FastAccessWeapons.Add(nullptr);
 	FastAccessWeapons.Add(nullptr);
 	FastAccessWeapons.Add(nullptr);
@@ -753,8 +846,6 @@ bool USEInventoryComponent::TryCraft(USEItemData* ItemData1, USEItemData* ItemDa
 
 		USEItemData* NewItemData = CreateItemData(Result, NewItemPosition.X, NewItemPosition.Y, ItemCount);
 		TryAddAmmo(NewItemData);
-
-		OnItemAdd.Broadcast(NewItemData);
 
 		return true;
 	}

@@ -5,7 +5,9 @@
 #include "Blueprint/UserWidget.h"
 #include "SEGameModeBase.h"
 
+#include "UI/SESubmenuWidget.h"
 #include "UI/InventoryWidgets/SEInventoryContainerWidget.h"
+#include "UI/PauseMenuWidgets/SEPauseMenuWidget.h"
 #include "UI/SEPlayerHUDWidget.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSEGameHUD, All, All);
@@ -50,6 +52,17 @@ void ASEGameHUD::OpenMap()
 	InventoryWidget->OpenMap();
 }
 
+void ASEGameHUD::OpenTargetWiget(USESubmenuWidget* WidgetToFocus)
+{
+	if (!WidgetToFocus->IsInViewport())
+	{
+		WidgetToFocus->AddToViewport();
+	}
+
+	PauseMenuWidget->CurrentTargetWidget = WidgetToFocus;
+	WidgetToFocus->Open();
+}
+
 void ASEGameHUD::OpenMenu()
 {
 	if (PauseMenuWidget == nullptr)
@@ -62,6 +75,15 @@ void ASEGameHUD::OpenMenu()
 
 void ASEGameHUD::Close()
 {
+	/*if (CurrentTargetWidget)
+	{
+		CurrentTargetWidget->SetVisibility(ESlateVisibility::Collapsed);
+		CurrentTargetWidget->RemoveFromParent();
+		CurrentTargetWidget = nullptr;
+
+		return;
+	}*/
+
 	if (PauseMenuWidget != nullptr && PauseMenuWidget->GetVisibility() == ESlateVisibility::Visible)
 	{
 		PauseMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
@@ -101,7 +123,7 @@ void ASEGameHUD::BeginPlay()
 		InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
 
-	PauseMenuWidget = CreateWidget<UUserWidget>(GetWorld(), PauseMenuWidgetClass);
+	PauseMenuWidget = CreateWidget<USEPauseMenuWidget>(GetWorld(), PauseMenuWidgetClass);
 	if (PauseMenuWidget != nullptr)
 	{
 		PauseMenuWidget->AddToViewport();

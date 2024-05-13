@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "SaveSystem/SESavableComponent.h"
 #include "SECoreTypes.h"
 #include "SEInventoryComponent.generated.h"
 
@@ -12,13 +13,14 @@ class USEWeaponData;
 class USECraftingList;
 class UDataTable;
 
+struct FSESaveItemData;
 struct FSEReadableRecord;
 struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemAddSignature, USEItemData*, NewItem);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class SILENTEVIL_API USEInventoryComponent : public UActorComponent
+class SILENTEVIL_API USEInventoryComponent : public UActorComponent, public ISESavableComponent
 {
 	GENERATED_BODY()
 
@@ -27,6 +29,9 @@ public:
 	USEInventoryComponent();
 
 	FOnItemAddSignature OnItemAdd;
+
+	virtual FSESaveDataComponent GetSaveData_Implementation();
+	virtual void LoadFromSaveData_Implementation(FSESaveDataComponent InRecord);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	FIntPoint GetMaxSize() const;
@@ -80,7 +85,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Inventory")
 	FIntPoint MaxSize = FIntPoint(4, 5);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Inventory")
+	UPROPERTY(SaveGame)
+	TArray<FSESaveItemData> SaveItems;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, SaveGame, Category = "Inventory")
 	int32 CurrentSlotsCount = 8;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "InventoryCrafting")
@@ -108,6 +116,7 @@ private:
 	TArray<FName> Records;
 
 	void Initialize();
+	void CreateFastAccessArray();
 
 	USEItemData* CreateItemData(USEBaseItem* Item, const int32& X, const int32& Y, const int32& Count = 1);
 	void AddItemData(USEItemData* ItemData);

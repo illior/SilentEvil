@@ -3,7 +3,77 @@
 
 #include "Player/SEPlayerState.h"
 
-#include "InventorySystem/SEItemData.h"
+#include "InventorySystem/SEBaseWeaponItem.h"
+#include "InventorySystem/SEWeaponData.h"
+
+FSESaveDataRecord ASEPlayerState::GetSaveDataRecord_Implementation()
+{
+	FSESaveDataRecord Record = FSESaveDataRecord();
+
+	Record.ActorClass = GetClass();
+	Record.ActorName = GetName();
+
+	SaveItems.Empty();
+	for (USEItemData* ItemData : StorageItems)
+	{
+		FSESaveItemData SaveItem = FSESaveItemData(ItemData);
+
+		if (ItemData->IsWeapon())
+		{
+			USEWeaponData* WeaponData = Cast<USEWeaponData>(ItemData);
+
+			SaveItem = FSESaveItemData(WeaponData);
+		}
+
+		SaveItems.Add(SaveItem);
+	}
+
+	FMemoryWriter Writer = FMemoryWriter(Record.BinaryData);
+	FObjectAndNameAsStringProxyArchive Ar(Writer, false);
+	Ar.ArIsSaveGame = true;
+
+	Serialize(Ar);
+
+	return Record;
+}
+
+void ASEPlayerState::LoadFromSaveDataRecord_Implementation(FSESaveDataRecord InRecord)
+{
+	FMemoryReader Reader = FMemoryReader(InRecord.BinaryData);
+	FObjectAndNameAsStringProxyArchive Ar(Reader, false);
+	Ar.ArIsSaveGame = true;
+
+	Serialize(Ar);
+
+	StorageItems.Empty();
+	for (FSESaveItemData SaveItem : SaveItems)
+	{
+		if (SaveItem.Item->IsA<USEBaseWeaponItem>())
+		{
+			USEWeaponData* WeaponData = NewObject<USEWeaponData>(this);
+
+			WeaponData->Item = SaveItem.Item;
+			WeaponData->Count = SaveItem.Count;
+			WeaponData->Position = SaveItem.Position;
+
+			WeaponData->CurrentAmmoInClip = SaveItem.AmmoInClip;
+
+			StorageItems.Add(WeaponData);
+		}
+		else
+		{
+			USEItemData* ItemData = NewObject<USEItemData>(this);
+
+			ItemData->Item = SaveItem.Item;
+			ItemData->Count = SaveItem.Count;
+			ItemData->Position = SaveItem.Position;
+
+			StorageItems.Add(ItemData);
+		}
+	}
+
+	SaveItems.Empty();
+}
 
 bool ASEPlayerState::AddItemToStorage(USEItemData* ItemData)
 {

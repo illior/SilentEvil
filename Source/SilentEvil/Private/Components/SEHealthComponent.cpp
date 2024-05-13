@@ -9,6 +9,30 @@ USEHealthComponent::USEHealthComponent()
 
 }
 
+FSESaveDataComponent USEHealthComponent::GetSaveData_Implementation()
+{
+	FSESaveDataComponent Record = FSESaveDataComponent();
+
+	Record.ComponentName = GetName();
+
+	FMemoryWriter Writer = FMemoryWriter(Record.BinaryData);
+	FObjectAndNameAsStringProxyArchive Ar(Writer, false);
+	Ar.ArIsSaveGame = true;
+
+	Serialize(Ar);
+
+	return Record;
+}
+
+void USEHealthComponent::LoadFromSaveData_Implementation(FSESaveDataComponent InRecord)
+{
+	FMemoryReader Reader = FMemoryReader(InRecord.BinaryData);
+	FObjectAndNameAsStringProxyArchive Ar(Reader, false);
+	Ar.ArIsSaveGame = true;
+
+	Serialize(Ar);
+}
+
 float USEHealthComponent::GetMaxHealtht() const
 {
 	return MaxHealth;

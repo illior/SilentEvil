@@ -24,6 +24,7 @@ void ASETakeableItem::Interact(APawn* Pawn)
 	USEInventoryComponent* CharacterInventory = Pawn->FindComponentByClass<USEInventoryComponent>();
 	if (CharacterInventory == nullptr)
 	{
+		StopCanInteract(Pawn);
 		return;
 	}
 

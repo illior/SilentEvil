@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "SaveSystem/SESavableObject.h"
 #include "SEInteractableObject.generated.h"
 
 class UCapsuleComponent;
@@ -12,7 +13,7 @@ class UWidgetComponent;
 DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_TwoParams(FInteractSignature, ASEInteractableObject, OnInteract, ASEInteractableObject*, ActivatedObject, APawn*, ActivatedBy);
 
 UCLASS()
-class SILENTEVIL_API ASEInteractableObject : public AActor
+class SILENTEVIL_API ASEInteractableObject : public AActor, public ISESavableObject
 {
 	GENERATED_BODY()
 	
@@ -35,6 +36,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Actor")
 	virtual FVector GetTargetLocation(AActor* RequestedBy = nullptr) const override;
+
+	virtual FSESaveDataRecord GetSaveDataRecord_Implementation();
+	virtual void LoadFromSaveDataRecord_Implementation(FSESaveDataRecord InRecord);
+
+	virtual void Tick(float DeltaSeconds) override;
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	USceneComponent* SceneComponent;
@@ -48,14 +54,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	bool DisableAfterInteract = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "Interaction")
 	bool IsEnabled = true;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Interaction")
 	float DistanceToInteract = 200.0f;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Interaction")
+	UPROPERTY(BlueprintReadOnly, Category = "Interaction")
 	APawn* CurrentPawn = nullptr;
+
+	bool ShowKey;
+
+	virtual float GetDistance() const;
 
 	virtual void Disable();
 	virtual void Enable();
@@ -63,6 +73,9 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	UPROPERTY(BlueprintAssignable, Category = "Interaction")
+	FInteractSignature OnInteract;
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Interaction", meta = (DisplayName = "StartCanInteract"))
 	void ReceiveStartCanInteract(APawn* Pawn);
 	UFUNCTION(BlueprintImplementableEvent, Category = "Interaction", meta = (DisplayName = "StopCanInteract"))
@@ -70,8 +83,6 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Interaction", meta = (DisplayName = "Interact"))
 	void ReceiveInteract(APawn* Pawn);
-	UPROPERTY(BlueprintAssignable, Category = "Interaction")
-	FInteractSignature OnInteract;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Interaction", meta = (DisplayName = "Disable"))
 	void ReceiveDisable();

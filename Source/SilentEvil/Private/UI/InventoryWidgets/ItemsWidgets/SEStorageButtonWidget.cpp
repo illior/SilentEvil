@@ -26,6 +26,7 @@ void USEStorageButtonWidget::SetItemData(USEItemData* InItemData)
 	ItemData->OnDataChanged.AddDynamic(this, &USEStorageButtonWidget::UpdateCount);
 
 	ItemImage->SetBrushFromTexture(ItemData->GetItemIcon());
+	Text = ItemData->GetItemName();
 	ButtonText->SetText(ItemData->GetItemName());
 
 	ItemCount->SetText(FText::FromString(FString::FromInt(ItemData->GetCount())));

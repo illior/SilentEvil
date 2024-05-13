@@ -17,12 +17,6 @@ public:
 
 	virtual void Interact(APawn* Pawn) override;
 
-	virtual void MoveVertical(const float& Value);
-	virtual void MoveHorizontal(const float& Value);
-	virtual void Apply();
-
-	virtual void Close();
-
 protected:
 
 };

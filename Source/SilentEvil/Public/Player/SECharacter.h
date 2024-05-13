@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "SaveSystem/SESavableObject.h"
 #include "SECharacter.generated.h"
 
 class USpringArmComponent;
-class UCameraComponent;
+class USECameraComponent;
 class USkeletalMeshComponent;
 class USEInventoryComponent;
 class USEHealthComponent;
@@ -19,13 +20,16 @@ struct FInputActionValue;
 class ASEInteractableObject;
 
 UCLASS()
-class SILENTEVIL_API ASECharacter : public ACharacter
+class SILENTEVIL_API ASECharacter : public ACharacter, public ISESavableObject
 {
 	GENERATED_BODY()
 
 
 public:
 	ASECharacter(const FObjectInitializer& ObjInit);
+
+	virtual FSESaveDataRecord GetSaveDataRecord_Implementation();
+	virtual void LoadFromSaveDataRecord_Implementation(FSESaveDataRecord InRecord);
 
 	virtual void Tick(float DeltaTime) override;
 
@@ -34,7 +38,7 @@ public:
 	bool GetShouldSprint() const;
 	float GetDistanceForInteraction() const;
 
-	UCameraComponent* GetCameraComponent() const;
+	USECameraComponent* GetCameraComponent() const;
 
 	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
@@ -43,7 +47,7 @@ protected:
 	USpringArmComponent* SpringArmComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	UCameraComponent* CameraComponent;
+	USECameraComponent* CameraComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	USkeletalMeshComponent* FirstPersonMeshComponent;
@@ -53,6 +57,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	USEHealthComponent* HealthComponent;
+
+	UPROPERTY(SaveGame)
+	TArray<FSESaveDataComponent> ComponentsData;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	UInputAction* MoveAction;
@@ -103,6 +110,9 @@ private:
 
 	UPROPERTY()
 	UCameraShakeBase* CameraShakeInstance = nullptr;
+
+	UPROPERTY(SaveGame)
+	FRotator ControlRotation;
 
 	void SearchInteractableObject();
 

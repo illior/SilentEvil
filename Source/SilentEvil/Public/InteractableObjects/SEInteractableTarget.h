@@ -21,16 +21,16 @@ class SILENTEVIL_API ASEInteractableTarget : public ASEInteractableObject
 public:
 	ASEInteractableTarget();
 
-	virtual void StartCanInteract(APawn* Pawn) override;
-	virtual void StopCanInteract(APawn* Pawn) override;
-
 	virtual void Interact(APawn* Pawn) override;
+
+	virtual void SetEnabled(bool NewValue);
+
+	UFUNCTION(BlueprintCallable, Category = "Interaction")
+	virtual void Close();
 
 	virtual void MoveVertical(const float& Value);
 	virtual void MoveHorizontal(const float& Value);
 	virtual void Apply();
-
-	virtual void Close();
 
 	virtual bool TryUseItem(USEBaseItem* InItem);
 
@@ -43,7 +43,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UCameraComponent* CameraComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction", meta = (EditCondition = "WithInventory"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "Interaction", meta = (EditCondition = "WithInventory"))
 	TArray<USEQuestItem*> InteractableItems;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction", meta = (EditCondition = "WithInventory"))
@@ -66,6 +66,9 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Interaction", meta = (DisplayName = "ItemUse"))
 	void ReceiveItemUse(USEQuestItem* InItem);
+
+	virtual void Disable();
+	virtual void Enable();
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")

@@ -52,7 +52,6 @@ bool USEInventoryWidget::Cancel()
 	case ESEInventoryState::Storage:
 		MoveCuresorFromStorage();
 		return false;
-		break;
 	default:
 		break;
 	}
@@ -773,6 +772,12 @@ void USEInventoryWidget::OnItemAdd(USEItemData* NewItemData)
 	if (ItemsPanel == nullptr || SlotsGridPanel == nullptr)
 	{
 		return;
+	}
+
+	if (InventoryItems.Num() == 0)
+	{
+		UpdateSlots();
+		UpdateItems();
 	}
 
 	USEInventoryItemWidget* InventorySlotWidget = CreateWidget<USEInventoryItemWidget>(GetWorld(), InventoryItemWidgetClass);

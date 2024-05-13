@@ -178,7 +178,7 @@ void USEInventoryContainerWidget::Cancel()
 		CanClose = Widgets[CurrentIndex]->Cancel();
 	}
 
-	if (TargetObject != nullptr)
+	if (TargetObject != nullptr && CanClose)
 	{
 		TargetObject->Close();
 	}

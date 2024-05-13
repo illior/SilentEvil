@@ -3,13 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UI/SEBaseWidgetButton.h"
+#include "UI/SEBaseButtonWidget.h"
 #include "SEStorageButtonWidget.generated.h"
 
 class USEItemData;
 
 UCLASS()
-class SILENTEVIL_API USEStorageButtonWidget : public USEBaseWidgetButton
+class SILENTEVIL_API USEStorageButtonWidget : public USEBaseButtonWidget
 {
 	GENERATED_BODY()
 	

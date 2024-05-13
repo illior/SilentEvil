@@ -27,29 +27,9 @@ ASEBaseDoor::ASEBaseDoor()
 	CollisionComponent->SetCollisionProfileName(FName("NoCollision"));
 }
 
-void ASEBaseDoor::StartCanInteract(APawn* Pawn)
-{
-	if (!IsEnabled)
-	{
-		return;
-	}
-
-	Super::StartCanInteract(Pawn);
-}
-
-void ASEBaseDoor::StopCanInteract(APawn* Pawn)
-{
-	if (!IsEnabled)
-	{
-		return;
-	}
-
-	Super::StopCanInteract(Pawn);
-}
-
 void ASEBaseDoor::Interact(APawn* Pawn)
 {
-	if (Pawn == nullptr || IsMove || !IsEnabled)
+	if (Pawn == nullptr || IsMove)
 	{
 		return;
 	}
@@ -86,7 +66,6 @@ void ASEBaseDoor::Enable()
 void ASEBaseDoor::Open(APawn* Pawn)
 {
 	IsMove = true;
-
 	TargetAngle = GetAngle(Pawn->GetActorLocation()) > 90.0f ? -OpenAngle : OpenAngle;
 
 	TimeLine->Play();
@@ -122,6 +101,7 @@ void ASEBaseDoor::BeginPlay()
 void ASEBaseDoor::TimeLineUpdate(float Alpha)
 {
 	float NewYaw = FMath::Lerp(0.0f, TargetAngle, Alpha);
+
 	DoorMesh->SetRelativeRotation(FRotator(0.0f, NewYaw, 0.0f));
 }
 
@@ -133,7 +113,7 @@ void ASEBaseDoor::StopMoveDoor()
 	Enable();
 }
 
-float ASEBaseDoor::GetAngle(FVector PawnLocation)
+float ASEBaseDoor::GetAngle(FVector PawnLocation) const
 {
 	FVector ArrowLocation = ArrowComponent->GetComponentLocation();
 

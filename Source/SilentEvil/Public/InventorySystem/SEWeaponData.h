@@ -14,6 +14,7 @@ class SILENTEVIL_API USEWeaponData : public USEItemData
 
 
 	friend class USEInventoryComponent;
+	friend class ASEPlayerState;
 public:
 	UFUNCTION(BlueprintCallable, Category = "ItemData")
 	int32 GetMaxAmmoInClip() const;
@@ -45,4 +46,51 @@ protected:
 	virtual void SetEquip(bool NewValue);
 
 	virtual void SetCurrentAmmoInClip(int32 NewCount);
+};
+
+USTRUCT(BlueprintType)
+struct FSESaveItemData
+{
+	GENERATED_BODY()
+
+public:
+	FSESaveItemData()
+	{
+
+	}
+
+	FSESaveItemData(USEItemData* ItemData)
+	{
+		Item = ItemData->GetItem();
+		Count = ItemData->GetCount();
+		Position = ItemData->GetPosition();
+	}
+
+	FSESaveItemData(USEWeaponData* WeaponData)
+	{
+		Item = WeaponData->GetItem();
+		Count = WeaponData->GetCount();
+		Position = WeaponData->GetPosition();
+		AmmoInClip = WeaponData->GetCurrentAmmoInClip();
+		FastAccessIndex = WeaponData->GetFastAccessIndex();
+		IsEquip = WeaponData->GetIsEquip();
+	}
+
+	UPROPERTY(SaveGame)
+	USEBaseItem* Item;
+
+	UPROPERTY(SaveGame)
+	int32 Count;
+
+	UPROPERTY(SaveGame)
+	int32 AmmoInClip;
+
+	UPROPERTY(SaveGame)
+	int32 FastAccessIndex;
+
+	UPROPERTY(SaveGame)
+	bool IsEquip;
+
+	UPROPERTY(SaveGame)
+	FIntPoint Position;
 };

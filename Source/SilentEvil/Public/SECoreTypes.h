@@ -83,3 +83,38 @@ enum class EAmmoType : uint8
 	Pistol	UMETA(DisplayName = "Pistol"),
 	Shotgun	UMETA(DisplayName = "Shotgun")
 };
+
+USTRUCT(BlueprintType)
+struct FSESaveDataRecord
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(SaveGame)
+	UClass* ActorClass;
+
+	UPROPERTY(SaveGame)
+	FString ActorName;
+
+	UPROPERTY(SaveGame)
+	FTransform ActorTransform;
+
+	UPROPERTY(SaveGame)
+	TArray<uint8> BinaryData;
+};
+
+USTRUCT(BlueprintType)
+struct FSESaveDataComponent
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(SaveGame)
+	FString ComponentName;
+
+	UPROPERTY(SaveGame)
+	FTransform ComponentTransform;
+
+	UPROPERTY(SaveGame)
+	TArray<uint8> BinaryData;
+};

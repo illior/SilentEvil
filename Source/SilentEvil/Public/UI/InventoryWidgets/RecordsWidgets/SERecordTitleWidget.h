@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UI/SEBaseWidgetButton.h"
+#include "UI/SEBaseButtonWidget.h"
 #include "InventorySystem/SEReadableRecord.h"
 #include "SERecordTitleWidget.generated.h"
 
 class UTextBlock;
 
 UCLASS()
-class SILENTEVIL_API USERecordTitleWidget : public USEBaseWidgetButton
+class SILENTEVIL_API USERecordTitleWidget : public USEBaseButtonWidget
 {
 	GENERATED_BODY()
 
